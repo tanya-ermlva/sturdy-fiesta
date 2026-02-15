@@ -200,18 +200,18 @@
 /* =============================================
    SPOTLIGHT ANIMATION
    ============================================= */
-@theme inline {
+@theme {
   --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
-}
- 
-@keyframes spotlight {
-  0% {
-    opacity: 0;
-    transform: translate(-72%, -62%) scale(0.5);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -40%) scale(1);
+
+  @keyframes spotlight {
+    0% {
+      opacity: 0;
+      transform: translate(-72%, -62%) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -40%) scale(1);
+    }
   }
 }
 
@@ -328,4 +328,36 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* =============================================
+   PLAYGROUND - Range slider styling
+   ============================================= */
+.playground-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border-muted);
+  outline: none;
+}
+.playground-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-default);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+.playground-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-default);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
 }

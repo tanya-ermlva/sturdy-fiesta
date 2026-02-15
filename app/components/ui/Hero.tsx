@@ -1,5 +1,7 @@
 import { Spotlight } from "@/app/components/ui/Spotlight";
-import { Grid } from "./ui/Grid";
+import { Grid } from "./Grid";
+import { TextGenerateEffect } from "./text-generate-effect";
+
 
 export default function Hero() {
   return (
@@ -18,13 +20,12 @@ export default function Hero() {
       <Grid className="absolute inset-0 border-2 border-green-500" />
 
       <div className="relative flex items-center justify-center h-screen border-2 border-red-500">
-        <div className="max-w-[89vw] border-2 border-blue-500 flex flex-col items-center justify-center">
-          <h2 className="text-foreground pb-4 text-4xl sm:text-7xl">
-            Tanya Ermolaeva
-          </h2>
-          <h3 className="text-foreground-muted text-sm uppercase tracking-wider">
-            Product & Visual Designer
-          </h3>
+        <div className="max-w-[94vw] border-2 border-blue-500 flex flex-col items-center justify-center gap-4 h-full">
+          <TextGenerateEffect words="Tanya Ermolaeva" className="text-foreground text-4xl sm:text-7xl border-2 border-red-500" />
+          <TextGenerateEffect words="/ / / \ \ \" className="text-foreground-muted text-sm uppercase tracking-wider" />
+
+          <TextGenerateEffect words="Product & Visual Designer" className="text-foreground-muted text-sm uppercase tracking-wider" />
+
         </div>
 
       </div>
