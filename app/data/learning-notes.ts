@@ -17,6 +17,13 @@ export interface LearningCategory {
   }[];
 }
 
+export interface FlatCard {
+  category: string;
+  subcategory: string;
+  title: string;
+  explanation: string;
+}
+
 export const learningNotes: LearningCategory[] = [
   {
     category: "CSS",
@@ -541,3 +548,16 @@ more frames to look smooth. Apple ProMotion = 120fps.`,
     ],
   },
 ];
+
+export function flattenNotes(notes: LearningCategory[]): FlatCard[] {
+  return notes.flatMap((cat) =>
+    cat.subcategories.flatMap((sub) =>
+      sub.notes.map((note) => ({
+        category: cat.category,
+        subcategory: sub.name,
+        title: note.title,
+        explanation: note.explanation,
+      }))
+    )
+  );
+}
