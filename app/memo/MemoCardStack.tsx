@@ -106,6 +106,7 @@ export function MemoCardStack({ notes }: MemoCardStackProps) {
             <button
               key={cat}
               onClick={() => selectCategory(cat)}
+              aria-pressed={activeCategory === cat}
               className={cn(
                 "px-4 py-1.5 rounded-full text-sm transition-colors",
                 activeCategory === cat
