@@ -1,4 +1,5 @@
 import { FlatCard } from "../data/learning-notes";
+import { MemoDemo } from "../components/ui/MemoDemo";
 import { cn } from "@/lib/utils";
 
 interface MemoCardProps {
@@ -46,14 +47,41 @@ export function MemoCard({ card, index, total, className }: MemoCardProps) {
         </span>
       </div>
 
-      {/* ── Body: title + explanation ── */}
+      {/* ── Body: title + explanation + illustration ── */}
       <div className="flex flex-col flex-1 overflow-y-auto px-5 py-5 gap-3">
-        <h2 className="text-lg text-foreground-strong leading-snug shrink-0">
+        <h2 className="text-xl text-foreground-strong leading-snug shrink-0">
           {card.title}
         </h2>
-        <p className="text-sm text-foreground-muted leading-relaxed">
+        <p className="text-base text-foreground-muted leading-relaxed">
           {card.explanation}
         </p>
+
+        {card.illustration && (
+          <div className="mt-1 shrink-0">
+            {card.illustration.label && (
+              <p className="text-[10px] text-foreground-subtle mb-1.5 uppercase tracking-wider">
+                {card.illustration.label}
+              </p>
+            )}
+            {card.illustration.type === "code" && (
+              <pre className="bg-surface-muted rounded-xl p-3 overflow-x-auto">
+                <code className="text-xs text-foreground-default font-mono whitespace-pre">
+                  {card.illustration.content}
+                </code>
+              </pre>
+            )}
+            {card.illustration.type === "diagram" && (
+              <pre className="bg-surface-muted rounded-xl p-3 overflow-x-auto">
+                <code className="text-xs text-foreground-muted font-mono whitespace-pre leading-relaxed">
+                  {card.illustration.content}
+                </code>
+              </pre>
+            )}
+            {card.illustration.type === "demo" && card.illustration.demoId && (
+              <MemoDemo demoId={card.illustration.demoId} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

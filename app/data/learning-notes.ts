@@ -22,6 +22,7 @@ export interface FlatCard {
   subcategory: string;
   title: string;
   explanation: string;
+  illustration?: LearningNote["illustration"];
 }
 
 export const learningNotes: LearningCategory[] = [
@@ -572,6 +573,7 @@ export function flattenNotes(notes: LearningCategory[]): FlatCard[] {
         subcategory: sub.name,
         title: note.title,
         explanation: note.explanation,
+        illustration: note.illustration,
       }))
     )
   );

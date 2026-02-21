@@ -85,7 +85,7 @@ export function MemoCardStack({ notes }: MemoCardStackProps) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{ type: "spring", stiffness: 500, damping: 40 }}
             drag="x"
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
