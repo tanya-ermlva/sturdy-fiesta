@@ -11,7 +11,8 @@ interface MemoCardProps {
 // Category → gradient class. Add entries as new categories appear.
 const categoryGradients: Record<string, string> = {
   CSS: "from-violet-900 via-indigo-800 to-indigo-900",
-  Motion: "from-emerald-900 via-teal-800 to-teal-900",
+  "Animation & JS": "from-emerald-900 via-teal-800 to-teal-900",
+  "Animation (Framer Motion)": "from-emerald-900 via-teal-800 to-teal-900",
   Tailwind: "from-sky-900 via-cyan-800 to-cyan-900",
 };
 
