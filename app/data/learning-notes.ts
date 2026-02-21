@@ -547,6 +547,21 @@ more frames to look smooth. Apple ProMotion = 120fps.`,
       },
     ],
   },
+  {
+    category: "Git",
+    subcategories: [
+      {
+        name: "Worktrees",
+        notes: [
+          {
+            title: "git worktrees",
+            explanation:
+              "A worktree lets you check out multiple branches simultaneously in separate folders — without stashing or switching. Normally one working directory = one branch. A worktree creates a second folder tied to a different branch, sharing the same .git history. File changes are fully isolated between them. Useful for: testing a feature without touching your current work, running two versions side-by-side in the browser, or reviewing someone else's branch without disturbing yours.",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export function flattenNotes(notes: LearningCategory[]): FlatCard[] {
