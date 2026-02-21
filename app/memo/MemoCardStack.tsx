@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { LearningCategory, flattenNotes } from "../data/learning-notes";
 import { MemoCard } from "./MemoCard";
 
@@ -46,7 +46,7 @@ export function MemoCardStack({ notes }: MemoCardStackProps) {
     }
   }
 
-  function handleDragEnd(_: unknown, info: { velocity: { x: number }; offset: { x: number } }) {
+  function handleDragEnd(_: PointerEvent, info: PanInfo) {
     const { velocity, offset } = info;
     if (velocity.x < -SWIPE_VELOCITY_THRESHOLD || offset.x < -80) {
       advance();
@@ -56,6 +56,14 @@ export function MemoCardStack({ notes }: MemoCardStackProps) {
   }
 
   const card = cards[index];
+
+  if (cards.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100dvh-4rem)] text-foreground-muted text-sm">
+        No notes yet.
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[calc(100dvh-4rem)] overflow-hidden">
