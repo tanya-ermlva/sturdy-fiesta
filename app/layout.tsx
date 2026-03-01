@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { themeScript } from "./theme-script";
 
+
 export const metadata: Metadata = {
   title: "Portfolio",
   description: "Just working on my portfolio",

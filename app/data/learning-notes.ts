@@ -314,6 +314,85 @@ export const learningNotes: LearningCategory[] = [
         ],
       },
       {
+        name: "Server vs Client Components",
+        notes: [
+          {
+            title: "What is 'the server' in Next.js?",
+            explanation:
+              "Every website involves two computers: a server (holds and builds the site) and your browser (displays it). In Next.js dev mode, the server is Node.js running on your own laptop at localhost:3000 — your browser talks to your own machine. In production (Vercel), the server is Vercel's computers in a data centre. The browser talks to them over the internet.",
+            illustration: {
+              type: "diagram",
+              label: "Dev vs production server",
+              content: `DEV                         PRODUCTION
+───                         ──────────
+Your laptop                 Vercel's computer
+  │ localhost:3000             │ yoursite.vercel.app
+  └──▶ Your browser            └──▶ Anyone's browser`,
+            },
+          },
+          {
+            title: "Server Component vs Client Component — the kitchen analogy",
+            explanation:
+              "Server Component = kitchen cooking. The server runs your code, produces finished HTML, and sends only the result to the browser. No JavaScript ships. Database passwords and API keys stay on the server — safe. Fast. Client Component ('use client') = tableside cooking. Your JavaScript code travels to the browser, React runs it there, and the page becomes interactive. Heavier, but necessary for anything the user can interact with.",
+            illustration: {
+              type: "diagram",
+              label: "What each type sends to the browser",
+              content: `SERVER COMPONENT
+  Server runs code → produces HTML
+  Browser receives: <div><h1>Hello</h1></div>
+  Zero JavaScript shipped. Fast.
+
+CLIENT COMPONENT ('use client')
+  Server sends HTML shell + JavaScript bundle
+  React runs IN THE BROWSER
+  Hooks work. Clicks work. Animations work.`,
+            },
+          },
+          {
+            title: "When to use Server vs Client",
+            explanation:
+              "The decision rule: does this component need to respond to the user? If yes → Client ('use client'). If no → Server (default, no directive needed). Client needs: onClick/onChange/onHover, useState/useEffect/useRef, Framer Motion animations, browser APIs (clipboard, localStorage), real-time updates. Server is good for: static text and layout, fetching data from a database or API, using secret keys/environment variables, most of your page content.",
+            illustration: {
+              type: "diagram",
+              label: "Decision tree",
+              content: `Does this component respond to the user?
+         │
+    ┌────┴────┐
+   YES        NO
+    │          │
+    ▼          ▼
+  CLIENT    SERVER
+'use client'  (default)`,
+            },
+          },
+          {
+            title: "Best practice: push 'use client' as deep as possible",
+            explanation:
+              "The worst thing you can do is mark page.tsx itself as 'use client' — now the entire page ships as JavaScript. The browser has to download, parse, and run it all before showing anything. Best practice: keep the top of your tree as Server Components. Only mark the specific small components that need interactivity. Everything above the 'use client' boundary stays fast, free HTML.",
+            illustration: {
+              type: "diagram",
+              label: "Good vs bad boundary placement",
+              content: `GOOD — boundary deep in the tree
+page.tsx         [SERVER] ← whole page fast
+└── Layout       [SERVER] ← layout fast
+    └── Article  [SERVER] ← content fast
+    └── LikeBtn  [CLIENT] ← only this ships JS
+
+BAD — boundary at the root
+page.tsx [CLIENT] ← entire page ships as JS
+└── Layout       ← contaminated
+    └── Article  ← contaminated
+    └── LikeBtn  ← contaminated`,
+            },
+          },
+          {
+            title: "'use client' contaminates downward, not upward",
+            explanation:
+              "When you mark a file 'use client', that file AND everything it imports becomes a client component. The contamination flows downward through the import tree. But components above it in the tree are unaffected — they stay as server components. This is why placing 'use client' on bento-grid.tsx (deep in the tree) only makes the bento grid client-side, while page.tsx and bento-grid-wrapper.tsx stay as fast server components.",
+          },
+        ],
+      },
+      {
         name: "Component patterns",
         notes: [
           {
@@ -346,6 +425,177 @@ export const learningNotes: LearningCategory[] = [
   {
     category: "Animation & JS",
     subcategories: [
+      {
+        name: "JavaScript Fundamentals",
+        notes: [
+          {
+            title: "Objects — labelled boxes for grouped data",
+            explanation:
+              "An object is a collection of key-value pairs wrapped in curly braces. Each key is a label (string), each value is anything: a string, number, array, even another object. You access values with dot notation (tanya.name) or bracket notation (tanya['name']). Objects are how JavaScript groups related data — and props in React are always objects under the hood.",
+            illustration: {
+              type: "code",
+              label: "Creating and reading an object",
+              content: `const tanya = {
+  name: "Tanya",
+  role: "designer",
+  company: "Granola",
+  tools: ["Figma", "React"]
+}
+
+tanya.name      // "Tanya"
+tanya.role      // "designer"
+tanya.tools[0]  // "Figma"  (arrays inside objects)`,
+            },
+          },
+          {
+            title: "Destructuring — pulling values out of an object",
+            explanation:
+              "Destructuring is a shortcut for extracting values from an object into standalone variables. The curly braces on the LEFT side of = are the template — they say 'pull these keys out'. The names must match the object's keys exactly. It's identical to writing const name = tanya.name on separate lines, just shorter. This is what you see in every React component's parameter list.",
+            illustration: {
+              type: "code",
+              label: "Three ways to write the same thing",
+              content: `const tanya = { name: "Tanya", role: "designer" }
+
+// Long way
+const name = tanya.name
+const role = tanya.role
+
+// Destructuring — same result, one line
+const { name, role } = tanya
+
+// In a function parameter — inline destructuring
+function greet({ name, role }) {
+  console.log(name, role)  // "Tanya" "designer"
+}
+greet(tanya)`,
+            },
+          },
+          {
+            title: "Destructuring and props are the same mechanism",
+            explanation:
+              "React props are just an object. When you write <Card title='Hi' />, React calls Card({ title: 'Hi' }). The { title, description } in a component's parameters is plain JavaScript destructuring of that object — not React magic. Understanding this means you already understand props if you understand destructuring.",
+            illustration: {
+              type: "code",
+              label: "Props object = object destructuring",
+              content: `// React passes this object to your component:
+// { title: "Design systems", description: "Tokens..." }
+
+// Without destructuring:
+function Card(props) {
+  return <h3>{props.title}</h3>
+}
+
+// With destructuring (identical, just cleaner):
+function Card({ title, description }) {
+  return <h3>{title}</h3>
+}`,
+            },
+          },
+          {
+            title: "Arrow function syntax — four forms",
+            explanation:
+              "Arrow functions are a shorthand for writing functions in JavaScript. All four forms do the same thing — pick the shortest one that's still readable. Form 1 (full body): (item) => { return item.title } — most explicit, use when learning. Form 2 (implicit return): (item) => item.title — no curly braces means 'return this expression'. Form 3 (no parens on single param): item => item.title. Form 4 (returning an object): (item) => ({ id: item.id }) — wrapping in () stops JS confusing {} for a code block.",
+            illustration: {
+              type: "code",
+              label: "Four ways to write the same arrow function",
+              content: `// Form 1: full body — most explicit
+(item) => { return item.title }
+
+// Form 2: implicit return — no {} means "return this"
+(item) => item.title
+
+// Form 3: single param, no parentheses
+item => item.title
+
+// Form 4: returning an object — () stops {} being read as a block
+(item) => ({ id: item.id, title: item.title })`,
+            },
+          },
+          {
+            title: ".map() — transform every item, same length in → out",
+            explanation:
+              "The most used array method in React. Loops over every item, runs your function on each one, and returns a new array of the results. The original array is unchanged. In React, you map over data arrays to produce arrays of components. Always needs a key prop on the outermost element when used in JSX.",
+            illustration: {
+              type: "code",
+              label: "JS then React",
+              content: `// JS: transform objects into strings
+const titles = projects.map((p) => p.title)
+// ["Granola", "Portfolio", "LeadDay", "Design system"]
+
+// React: transform objects into components
+projects.map((p) => (
+  <Card key={p.id} title={p.title} />
+))
+// key= is required — React uses it to track list items`,
+            },
+          },
+          {
+            title: ".filter() — keep items that pass a test, shorter array out",
+            explanation:
+              "The function you pass must return true (keep this item) or false (drop it). Returns a new shorter array — never modifies the original. In React, filter before you map to show only matching items. ! means NOT: !project.done means 'where done is false'.",
+            illustration: {
+              type: "code",
+              label: "JS then React",
+              content: `// Keep only personal projects
+projects.filter((p) => p.type === "personal")
+
+// Keep only unfinished (! means NOT)
+projects.filter((p) => !p.done)
+
+// React: filter then map — the most common pattern
+projects
+  .filter((p) => p.type === activeCategory)
+  .map((p) => <Card key={p.id} title={p.title} />)`,
+            },
+          },
+          {
+            title: ".find() — returns the first match as a single item",
+            explanation:
+              "Like filter but stops at the first match and returns the item itself, not an array. Returns undefined if nothing matches. Use ?. (optional chaining) when accessing properties on the result in case it's undefined: found?.title won't crash if found is undefined.",
+            illustration: {
+              type: "code",
+              label: "find returns an item, not an array",
+              content: `const portfolio = projects.find((p) => p.id === 2)
+// { id: 2, title: "Portfolio site", ... }  ← the item itself
+
+const missing = projects.find((p) => p.id === 99)
+// undefined  ← nothing matched
+
+// Safe access with optional chaining
+portfolio?.title   // "Portfolio site" or undefined (no crash)`,
+            },
+          },
+          {
+            title: ".some() and .every() — yes/no questions about an array",
+            explanation:
+              ".some() returns true if at least one item passes the test. .every() returns true only if ALL items pass. Both return a boolean, never an array. Useful for conditional UI: show a banner if some items are unread, disable a button if not every field is filled.",
+            illustration: {
+              type: "code",
+              label: "Asking boolean questions",
+              content: `projects.some((p) => !p.done)   // true — at least one unfinished
+projects.every((p) => p.done)  // false — not all done
+
+// In React:
+{projects.some((p) => !p.done) && <Banner text="You have unfinished work" />}`,
+            },
+          },
+          {
+            title: ".reduce() — collapse an array into a single value",
+            explanation:
+              "Takes two arguments: a callback and a starting value. The callback receives (accumulator, currentItem) — the accumulator is your running result, starting from the starting value. Use it to sum numbers, count items, or group data into an object. Less common in UI rendering but essential for aggregating data.",
+            illustration: {
+              type: "code",
+              label: "Sum hours across all projects",
+              content: `const total = projects.reduce((acc, p) => acc + p.hours, 0)
+//                              └──┘  └┘   └──────────┘  └┘
+//                         accumulator each  add this       start
+//                         (running sum) item  item's hours  at 0
+
+// total = 77`,
+            },
+          },
+        ],
+      },
       {
         name: "Scroll-based behavior",
         notes: [
@@ -543,6 +793,356 @@ more frames to look smooth. Apple ProMotion = 120fps.`,
             title: "use client directive for interactive components",
             explanation:
               "Next.js defaults to Server Components (rendered on the server, no JavaScript sent to browser). Any component using useState, event handlers (onClick, onMouseEnter), or animation libraries must have 'use client' at the top. This tells Next.js to include the component's JavaScript in the browser bundle so it can be interactive.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    category: "React & The Browser",
+    subcategories: [
+      {
+        name: "The DOM",
+        notes: [
+          {
+            title: "What is the DOM?",
+            explanation:
+              "When a browser loads a webpage, it reads the HTML and builds a live tree of every element in memory. That tree is called the DOM — Document Object Model. Think of it like Figma's layers panel: a nested hierarchy of every element on screen. The browser uses this tree to decide what to paint. JavaScript can reach into the tree and change nodes at runtime — that's how interactive UIs work.",
+            illustration: {
+              type: "diagram",
+              label: "HTML becomes a tree in memory",
+              content: `Your HTML                  The DOM (in memory)
+──────────                 ──────────────────
+<html>                     document
+  <body>                   └── <html>
+    <section>       ──▶        └── <body>
+      <h1>Hello</h1>               └── <section>
+      <p>World</p>                      ├── <h1> "Hello"
+    </section>                          └── <p> "World"
+  </body>
+</html>`,
+            },
+          },
+        ],
+      },
+      {
+        name: "JSX",
+        notes: [
+          {
+            title: "JSX is not HTML",
+            explanation:
+              "JSX is a syntax extension for JavaScript that looks like HTML but compiles to plain JS function calls before running. Each JSX tag becomes a React.createElement() call that produces a plain JavaScript object — a description of what you want. Nothing has been painted yet. JSX is just a shorthand for describing a tree of elements.",
+            illustration: {
+              type: "code",
+              label: "JSX compiles to JavaScript",
+              content: `// What you write
+const el = (
+  <h1 className="title">Hello</h1>
+)
+
+// What actually runs
+const el = React.createElement(
+  'h1',
+  { className: 'title' },
+  'Hello'
+)`,
+            },
+          },
+          {
+            title: "Uppercase = React component, lowercase = HTML element",
+            explanation:
+              "React uses the first character of a JSX tag to decide what to do. Uppercase (PascalCase) = look up the component in JavaScript scope and call it. Lowercase = treat as a native HTML element and pass to the browser's DOM. This is why <div> and <span> are lowercase (they ARE native DOM elements) and your components must be PascalCase. Writing <bento-grid> won't render your React component — it creates an unknown HTML element.",
+            illustration: {
+              type: "code",
+              label: "Case determines what React does with the tag",
+              content: `<bento-grid>  →  DOM element (unknown, renders nothing useful)
+<BentoGrid>   →  React component (your code runs)
+
+// The rule:
+import { BentoGrid } from './bento-grid'  // ← must import
+<BentoGrid />                             // ← must be uppercase`,
+            },
+          },
+        ],
+      },
+      {
+        name: "Reactivity",
+        notes: [
+          {
+            title: "UI = f(state) — the core idea of React",
+            explanation:
+              "React's central insight: your UI is a pure function of your state. You describe what the UI should look like for any given state, and React figures out how to update the DOM. You never manually poke DOM nodes. This is called declarative — you say what the result should be, not how to get there. The old way (jQuery) was imperative: you had to orchestrate every DOM change yourself, in the right order. Missed a step and state would get out of sync.",
+            illustration: {
+              type: "diagram",
+              label: "State change → React re-renders automatically",
+              content: `liked = false  ──▶  <button>♡ Like</button>
+
+User clicks → liked = true  (you just update data)
+
+liked = true   ──▶  <button>♥ Liked!</button>
+
+You never touched the DOM.`,
+            },
+          },
+          {
+            title: "Declarative vs imperative — designer analogy",
+            explanation:
+              "Declarative is how you think in Figma's auto-layout: you set a constraint or value and everything that depends on it updates automatically. You don't say 'move this layer 10px left, resize this frame, reflow this text'. Imperative is the old manual way — doing each step yourself. React brought declarative thinking to DOM manipulation.",
+          },
+        ],
+      },
+      {
+        name: "Virtual DOM",
+        notes: [
+          {
+            title: "Why React doesn't update the whole DOM on every change",
+            explanation:
+              "Writing to the real DOM is slow — it triggers layout recalculations and repaints. React solves this by keeping its own lightweight copy of the tree in memory (the Virtual DOM). When state changes, React re-runs your component (fast — just JS objects), diffs the old vs new virtual tree to find what changed, then surgically updates only those nodes in the real DOM. You get automatic updates without the performance cost of rebuilding everything.",
+            illustration: {
+              type: "diagram",
+              label: "React's diff-then-patch cycle",
+              content: `State changes
+     │
+     ▼
+React re-runs component        ← fast (JS objects)
+     │ new Virtual DOM
+     ▼
+DIFF: old vs new               ← "what changed?"
+     │ only changed nodes
+     ▼
+Update real DOM surgically     ← slow, done minimally`,
+            },
+          },
+        ],
+      },
+      {
+        name: "Rendering",
+        notes: [
+          {
+            title: "Client-side rendering (CSR) vs server-side rendering (SSR)",
+            explanation:
+              "CSR: the server sends an almost-empty HTML file and a big JS bundle. The browser downloads the JS, React runs in the browser, builds the DOM from scratch. Users see a blank screen until JS loads — can feel slow. SSR: the server runs React first, produces full HTML, sends it already complete. The browser shows content immediately. React then 'hydrates' — attaches event listeners to the existing HTML to make it interactive. Next.js does SSR by default, which is why this portfolio loads fast.",
+            illustration: {
+              type: "diagram",
+              label: "CSR sends an empty shell; SSR sends real content",
+              content: `CSR                              SSR
+───                              ───
+Server sends: <div id="root">    Server runs React first
+              <script app.js>    Server sends: full HTML
+
+Browser: blank screen            Browser: content visible
+         ↓ downloads JS                   ↓
+         React builds DOM        React hydrates (attaches
+         ↓                       event listeners)
+         Content appears         ↓
+                                 Interactive`,
+            },
+          },
+          {
+            title: "Hydration",
+            explanation:
+              "After SSR sends full HTML to the browser, the page looks right but buttons don't work yet — there are no event listeners. Hydration is when React runs in the browser, matches its virtual tree to the existing HTML, and attaches all the interactivity. This is why you sometimes see a brief window where a page is visible but not yet clickable.",
+          },
+        ],
+      },
+      {
+        name: "Electron",
+        notes: [
+          {
+            title: "Electron = Chromium + Node.js packaged as a desktop app",
+            explanation:
+              "Electron bundles a full Chromium browser (the engine behind Chrome) with Node.js into a standalone desktop app. Your React code runs inside Chromium exactly as it would in a browser tab — same DOM, same CSS, same rendering. Node.js runs alongside it giving the app powers a website can't have: file system access, OS notifications, menu bar, clipboard, system APIs. Apps like Granola, Figma, VS Code, and Slack are all built on Electron.",
+            illustration: {
+              type: "diagram",
+              label: "Electron's two layers",
+              content: `┌─────────────────────────────────────────┐
+│             ELECTRON APP               │
+│  ┌───────────────────────────────────┐ │
+│  │  Chromium (a full browser)        │ │
+│  │  React app runs here              │ │
+│  │  DOM, CSS — all identical         │ │
+│  └───────────────────────────────────┘ │
+│  ┌───────────────────────────────────┐ │
+│  │  Node.js                          │ │
+│  │  File system, OS APIs, clipboard  │ │
+│  └───────────────────────────────────┘ │
+└─────────────────────────────────────────┘`,
+            },
+          },
+          {
+            title: "Electron apps are always CSR, never SSR",
+            explanation:
+              "There's no server in an Electron app — it's a desktop app running locally. React always runs in the bundled Chromium renderer process (client-side). SSR only makes sense when there's a server to pre-render HTML before sending it to a browser. In Electron, the 'browser' IS the app window and all rendering happens there.",
+          },
+        ],
+      },
+      {
+        name: "Components & Props",
+        notes: [
+          {
+            title: "A component is just a function that returns JSX",
+            explanation:
+              "Three rules: 1) The function name starts with uppercase (Card, not card). 2) It returns JSX — the HTML-like description of what to render. 3) You use it like an HTML tag: <Card />. React calls your function, takes what it returns, and puts those DOM nodes in place. No magic, no special syntax — just a function.",
+            illustration: {
+              type: "code",
+              label: "The simplest possible component",
+              content: `function Card() {
+  return (
+    <div className="rounded-2xl p-6">
+      <p>Description</p>
+      <h3>Title</h3>
+    </div>
+  )
+}
+
+// Used like this:
+<Card />   // React calls Card(), inserts the result`,
+            },
+          },
+          {
+            title: "Props are just a JavaScript object",
+            explanation:
+              "When you write attributes on a component tag, React bundles them all into one object and passes it to your function. <Card title='Hello' description='World' /> becomes Card({ title: 'Hello', description: 'World' }). Inside the function, you use those values in JSX with curly braces: {title}. The curly braces are the switch between JSX mode (markup) and JavaScript mode (variables, expressions).",
+            illustration: {
+              type: "code",
+              label: "What React does with your attributes",
+              content: `// You write:
+<Card title="Design systems" description="Tokens and rules" />
+
+// React calls:
+Card({ title: "Design systems", description: "Tokens and rules" })
+
+// Inside the function:
+function Card({ title, description }) {
+  return (
+    <div>
+      <p>{description}</p>   // {} = "evaluate this as JS"
+      <h3>{title}</h3>
+    </div>
+  )
+}`,
+            },
+          },
+          {
+            title: "Destructuring — pulling values out of an object",
+            explanation:
+              "Destructuring is a JavaScript shortcut for extracting values from an object into named variables. Instead of props.title and props.description, you pull them out at the function signature using curly braces. The names must match the object's keys exactly. It's the same as declaring const title = props.title — just written inline. This is what you see in every React component's parameter list.",
+            illustration: {
+              type: "code",
+              label: "Three ways to write the same thing",
+              content: `// Long way — access via props object
+function Card(props) {
+  const title = props.title
+  const description = props.description
+  return <h3>{title}</h3>
+}
+
+// Destructure after receiving
+function Card(props) {
+  const { title, description } = props
+  return <h3>{title}</h3>
+}
+
+// Destructure inline (what you'll see everywhere)
+function Card({ title, description }) {
+  return <h3>{title}</h3>
+}
+
+// All three are identical. The third is just the shortest.`,
+            },
+          },
+          {
+            title: "TypeScript prop types — the contract",
+            explanation:
+              "The block after the destructured props tells TypeScript what each prop is allowed to be. If you pass the wrong type (a number where a string is expected), TypeScript underlines it red before you run anything. The ? after a prop name makes it optional — you can omit it and nothing breaks. Required props (no ?) must always be provided or TypeScript will warn you.",
+            illustration: {
+              type: "code",
+              label: "Reading a TypeScript prop definition",
+              content: `function Card({
+  title,
+  description,
+  className,
+}: {
+  title: string        // required — must always pass this
+  description: string  // required — must always pass this
+  className?: string   // optional — ? means you can skip it
+}) { ... }
+
+// This works:    <Card title="Hi" description="Hello" />
+// This works:    <Card title="Hi" description="Hello" className="p-4" />
+// Type error:    <Card title={42} description="Hello" />
+//                             ↑ number, not string`,
+            },
+          },
+          {
+            title: "The progression: divs → component → props",
+            explanation:
+              "Stage 1: raw divs, copy-pasted. Change the design = edit every copy. Stage 2: extracted into a component. Change the design = edit one function, all instances update. Stage 3: add props. Now structure lives in one place, content comes from outside. This is the whole point of components — separate the shape from the data.",
+            illustration: {
+              type: "diagram",
+              label: "Same output, increasingly maintainable",
+              content: `Stage 1   <div>...</div>        pasted 3×, 3 places to edit
+          <div>...</div>
+          <div>...</div>
+
+Stage 2   <Card />              defined once, reused 3×
+          <Card />              change structure = 1 edit
+          <Card />
+
+Stage 3   <Card title="A" />    defined once, reused 3×
+          <Card title="B" />    change structure = 1 edit
+          <Card title="C" />    change content = change one prop`,
+            },
+          },
+        ],
+      },
+      {
+        name: "CSS Grid",
+        notes: [
+          {
+            title: "How CSS grid works",
+            explanation:
+              "Add display: grid (or Tailwind's 'grid') to a container and it becomes a grid. Its direct children automatically become grid items placed into the columns you define. grid-template-columns sets how many columns and how wide each is. gap sets the gutter between cells. Children don't need to do anything — the container does all the placing.",
+            illustration: {
+              type: "code",
+              label: "The three classes that make a grid",
+              content: `<div className="grid grid-cols-3 gap-4">
+  <div>cell 1</div>   // placed in col 1 automatically
+  <div>cell 2</div>   // placed in col 2
+  <div>cell 3</div>   // placed in col 3
+  <div>cell 4</div>   // wraps to next row, col 1
+</div>
+
+// grid        →  display: grid
+// grid-cols-3 →  grid-template-columns: repeat(3, 1fr)
+// gap-4       →  gap: 1rem (between all cells)`,
+            },
+          },
+          {
+            title: "1fr — what the fraction unit means",
+            explanation:
+              "fr means 'fraction of the remaining space'. grid-cols-3 is shorthand for repeat(3, 1fr) — divide the available width into 3 equal fractions. grid-cols-[2fr_1fr] would give the first column twice the space of the second. Unlike px or %, fr units are calculated after gaps are removed, so they always fit perfectly.",
+          },
+          {
+            title: "col-span — making a cell take up multiple columns",
+            explanation:
+              "By default each grid item fills one cell. Add col-span-2 to a child and it stretches across 2 columns. col-span-3 takes the full width of a 3-column grid. This is how bento layouts work — one grid, items with different spans creating an asymmetric layout. The span is set on the item, not the container.",
+            illustration: {
+              type: "diagram",
+              label: "col-span creates the bento layout",
+              content: `<div className="grid grid-cols-3 gap-4">
+  <div className="col-span-2">wide card</div>
+  <div>narrow</div>
+  <div>narrow</div>
+  <div className="col-span-2">wide card</div>
+</div>
+
+┌──────────────────┬────────┐
+│   col-span-2     │ 1 col  │
+├────────┬─────────────────-┤
+│ 1 col  │   col-span-2     │
+└────────┴──────────────────┘`,
+            },
           },
         ],
       },
