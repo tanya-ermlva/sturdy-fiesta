@@ -1,7 +1,6 @@
 # Homepage Copy
 
 Last updated: 2026-03-01
-Status: in progress — fill in [brackets] before building
 
 ---
 
@@ -31,7 +30,7 @@ Increasingly building as well as designing (6)
 
 Expand on hover. Tone: informative, friendly — not too playful.
 
-**(1)** Studies philosophy and design in Moscow. An unlikely pairing that made complete sense. Left in 2022
+**(1)** Studied philosophy and design in Moscow. An unlikely pairing that made complete sense. Left in 2022.
 
 **(2)** Moved to London in 2023.
 
@@ -39,8 +38,7 @@ Expand on hover. Tone: informative, friendly — not too playful.
 
 **(4)** From founding designer roles in small teams to working at larger companies, from studios to in-house work.
 
-**(5)** Started in visual and brand, moved into product. The motion work happened
-somewhere in the middle and never fully stopped.
+**(5)** Started in visual and brand, moved into product. The motion work happened somewhere in the middle and never fully stopped.
 
 **(6)** This site is the experiment.
 
@@ -59,6 +57,4 @@ Top-right, stacked vertically. Plain text, no icons.
 
 ## Open questions
 
-- [ ] Footnote (1): which school, and which year did you leave Moscow?
-- [ ] Footnote (2): which year did you move to London? Any London line, or drop it?
-- [ ] Social links: confirm all four are active
+- [ ] Social links: confirm all four active + fill in URLs
