@@ -103,13 +103,27 @@ export function HomeClient() {
             className="fixed pointer-events-none z-50"
             style={{ right: '5%', top: '50%', transform: 'translateY(-50%)', width: '360px' }}
           >
-            <div className="bg-background border-hairline rounded-3xl p-8 shadow-lg">
-              <p
-                className="text-foreground-muted"
-                style={{ fontSize: '16px', lineHeight: '1.65' }}
-              >
-                {activeLine.footnote}
-              </p>
+            <div className="bg-background border-hairline rounded-3xl shadow-lg overflow-hidden">
+              {/* Label chip */}
+              <div className="px-6 pt-5 pb-0">
+                <span className="inline-block text-foreground-subtle uppercase tracking-widest"
+                  style={{ fontSize: '10px', letterSpacing: '0.12em' }}>
+                  {activeLine.popover.label}
+                </span>
+              </div>
+              {/* Title */}
+              <div className="px-6 pt-2 pb-0">
+                <p className="text-foreground-strong font-medium leading-snug"
+                  style={{ fontSize: '17px' }}>
+                  {activeLine.popover.title}
+                </p>
+              </div>
+              {/* Body */}
+              <div className="px-6 pt-3 pb-5">
+                <p className="text-foreground-muted" style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                  {activeLine.popover.body}
+                </p>
+              </div>
             </div>
           </motion.div>
         )}
