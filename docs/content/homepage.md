@@ -5,12 +5,6 @@ Status: in progress — fill in [brackets] before building
 
 ---
 
-## Name
-
-Tanya Ermolaeva
-
----
-
 ## Bio Lines
 
 One thought per line, declarative. Format nods to Granola's meeting summaries.
@@ -29,17 +23,19 @@ Increasingly building as well as designing (6)
 
 ## Footnotes
 
-Expand on hover. Tone: informative, friendly — not too playful.
+Expand on hover. Tone: informative, direct, Kara Swisher register with artistic texture.
 
-**(1)** [School name] in Moscow. Left in [year]. Haven't looked back, mostly.
+**(1)** Studied philosophy and design in Moscow. [Pick one closing line — still deciding:]
+  - Option C: The two subjects still argue. Left in 2022.
+  - Option E: One asks why; the other answers with form. Left in 2022.
 
-**(2)** Since [year]. [Optional: one line about London, or leave as pure fact.]
+**(2)** Since [year]. [Optional closing line — or leave as bare fact.]
 
 **(3)** Granola is an AI meeting assistant. I work on the core product experience —
 features, flows, and design system.
 
-**(4)** A mix of agency, studio, and in-house work. Strelka was a research and design
-institute; Intercom was B2B SaaS. Everything in between was somewhere between the two.
+**(4)** From co-founding a startup to designing at Intercom's scale — with studio and
+agency work in between. Each context required a different version of the job.
 
 **(5)** Started in visual and brand, moved into product. The motion work happened
 somewhere in the middle and never fully stopped.
@@ -61,6 +57,6 @@ Top-right, stacked vertically. Plain text, no icons.
 
 ## Open questions
 
-- [ ] Footnote (1): which school, and which year did you leave Moscow?
-- [ ] Footnote (2): which year did you move to London? Any London line, or drop it?
+- [ ] Footnote (1): choose between Option C and E, or iterate further
+- [ ] Footnote (2): year you moved to London + any closing line?
 - [ ] Social links: confirm all four are active
