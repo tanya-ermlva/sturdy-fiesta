@@ -37,14 +37,18 @@ function Fn({
   )
 }
 
-function LogoPlaceholder({ label }: { label: string }) {
+function LogoPlaceholder() {
   return (
     <span
-      className="inline-flex items-center justify-center align-middle rounded-md border border-dashed border-border-muted bg-surface-muted text-foreground-subtle"
-      style={{ fontSize: '10px', letterSpacing: '0.05em', padding: '0 6px', height: '22px', verticalAlign: 'middle' }}
-    >
-      {label}
-    </span>
+      className="inline-block rounded-md"
+      style={{
+        width: '22px',
+        height: '22px',
+        verticalAlign: 'top',
+        background: 'linear-gradient(135deg, var(--color-surface-strong) 0%, var(--color-surface-muted) 100%)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+      }}
+    />
   )
 }
 
@@ -75,23 +79,6 @@ export function HomeClient() {
             <img src="/imgs/Explosion.svg" alt="" width={55} height={55} className="dark:invert" />
             <img src="/imgs/Direction.svg" alt="" width={98} height={50} className="dark:invert" />
           </div>
-
-          <nav aria-label="Social links">
-            <ul className="flex flex-col gap-1">
-              {[
-                { label: 'Email',     href: 'mailto:' },
-                { label: 'LinkedIn',  href: '#' },
-                { label: 'Instagram', href: '#' },
-                { label: 'Twitter',   href: '#' },
-              ].map(({ label, href }) => (
-                <li key={label}>
-                  <a href={href} className="text-foreground-muted text-base leading-4 hover:text-foreground transition-colors duration-150">
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
         </header>
 
         {/* ── Content row ─────────────────────────────── */}
@@ -108,16 +95,15 @@ export function HomeClient() {
 
             <p
               className="text-foreground-muted select-none"
-              style={{ fontSize: 'clamp(18px, 2.12vw, 32px)', letterSpacing: '-0.02em', lineHeight: 1.25 }}
+              style={{ fontSize: 'clamp(18px, 2.12vw, 32px)', letterSpacing: '-0.02em', lineHeight: 1.0, maxWidth: '60%' }}
             >
-              <LogoPlaceholder label="MSK FLAG" />{' '}
               Moscow-born product & visual designer{' '}
               <Fn id={1} index={0} activeId={activeId} refs={numberRefs} onEnter={handleNumberEnter} onLeave={() => setActiveId(null)} />,
-              {' '}based in <LogoPlaceholder label="LDN FLAG" /> London since 2023{' '}
+              {' '}based in <LogoPlaceholder /> London since 2023{' '}
               <Fn id={2} index={1} activeId={activeId} refs={numberRefs} onEnter={handleNumberEnter} onLeave={() => setActiveId(null)} />.
-              {' '}Currently designing at <LogoPlaceholder label="GRANOLA LOGO" /> Granola{' '}
+              {' '}Currently designing at <LogoPlaceholder /> Granola{' '}
               <Fn id={3} index={2} activeId={activeId} refs={numberRefs} onEnter={handleNumberEnter} onLeave={() => setActiveId(null)} />.
-              {' '}Previously at <LogoPlaceholder label="INTERCOM" />, <LogoPlaceholder label="WEDNESDAY" />, Aaply,
+              {' '}Previously at <LogoPlaceholder /> Intercom, <LogoPlaceholder /> Wednesday Studio, Aaply,
               and Strelka{' '}
               <Fn id={4} index={3} activeId={activeId} refs={numberRefs} onEnter={handleNumberEnter} onLeave={() => setActiveId(null)} />.
               {' '}Generalist: product, visual, branding, and motion{' '}
@@ -132,6 +118,24 @@ export function HomeClient() {
             <ProjectDock onProjectClick={setActiveProject} />
           </div>
         </div>
+
+        {/* ── Footer nav ──────────────────────────────── */}
+        <nav aria-label="Social links">
+          <ul className="flex gap-5">
+            {[
+              { label: 'Email',     href: 'mailto:' },
+              { label: 'LinkedIn',  href: '#' },
+              { label: 'Instagram', href: '#' },
+              { label: 'Twitter',   href: '#' },
+            ].map(({ label, href }) => (
+              <li key={label}>
+                <a href={href} className="text-foreground-muted text-base hover:text-foreground transition-colors duration-150">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         {/* ── Footnote popover ────────────────────────── */}
         <AnimatePresence mode="wait">
