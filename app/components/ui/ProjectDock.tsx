@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion } from 'motion/react'
 
 export interface Project {
@@ -20,14 +20,15 @@ export const PROJECTS: Project[] = [
 
 const MAX_SCALE = 2.2
 
-// Responsive values computed from viewport width
-function getConfig() {
+const N = PROJECTS.length
+
+function getGap() {
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1512
-  return {
-    base: Math.round(Math.max(40, vw * 72  / 1512)),
-    gap:  Math.round(Math.max(4,  vw * 8   / 1512)),
-    zone: Math.round(Math.max(80, vw * 150 / 1512)), // influence radius
-  }
+  return Math.round(Math.max(4, vw * 8 / 1512))
+}
+
+function baseFromHeight(h: number, gap: number) {
+  return Math.max(40, Math.floor((h - (N - 1) * gap) / N))
 }
 
 interface ItemState { scale: number; y: number }
@@ -36,7 +37,7 @@ interface ItemState { scale: number; y: number }
 function calcStates(
   mouseY: number | null,
   containerTop: number,
-  cfg: ReturnType<typeof getConfig>
+  cfg: { base: number; gap: number; zone: number }
 ): ItemState[] {
   const { base, gap, zone } = cfg
 
@@ -62,34 +63,25 @@ function calcStates(
   })
 }
 
-export function ProjectDock({ onProjectClick }: { onProjectClick: (p: Project) => void }) {
+export function ProjectDock({ onProjectClick, availableHeight }: { onProjectClick: (p: Project) => void; availableHeight: number }) {
   const containerRef    = useRef<HTMLDivElement>(null)
-  const cfgRef          = useRef(getConfig())
   const containerTopRef = useRef(0)
-  const [cfg, setCfg]   = useState(getConfig)
+  const gap  = getGap()
+  const base = availableHeight > 0 ? baseFromHeight(availableHeight, gap) : 72
   const [states, setStates] = useState<ItemState[]>(() =>
     PROJECTS.map(() => ({ scale: 1, y: 0 }))
   )
-
-  // Keep config current on resize
-  useEffect(() => {
-    const update = () => { cfgRef.current = getConfig(); setCfg(getConfig()) }
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
 
   return (
     <div
       ref={containerRef}
       className="flex flex-col items-end"
-      style={{ gap: cfg.gap, overflow: 'visible' }}
+      style={{ gap, overflow: 'visible' }}
       onMouseEnter={() => {
-        cfgRef.current = getConfig()
-        // Record container top once — before any hover translations
         containerTopRef.current = containerRef.current?.getBoundingClientRect().top ?? 0
       }}
       onMouseMove={(e) => {
-        setStates(calcStates(e.clientY, containerTopRef.current, cfgRef.current))
+        setStates(calcStates(e.clientY, containerTopRef.current, { base, gap, zone: base * 2 }))
       }}
       onMouseLeave={() => {
         setStates(PROJECTS.map(() => ({ scale: 1, y: 0 })))
@@ -101,12 +93,12 @@ export function ProjectDock({ onProjectClick }: { onProjectClick: (p: Project) =
           animate={{ scale: states[i].scale, y: states[i].y }}
           transition={{ type: 'spring', stiffness: 380, damping: 28, mass: 0.4 }}
           style={{
-            width: cfg.base,
-            height: cfg.base,
+            width: base,
+            height: base,
             transformOrigin: 'right center',
             flexShrink: 0,
             cursor: 'pointer',
-            borderRadius: Math.round(cfg.base * 12 / 72),
+            borderRadius: Math.round(base * 12 / 72),
             overflow: 'hidden',
           }}
           onClick={() => onProjectClick(p)}
@@ -118,7 +110,7 @@ export function ProjectDock({ onProjectClick }: { onProjectClick: (p: Project) =
             <span style={{
               color: p.fg,
               fontFamily: "'Plain Medium', sans-serif",
-              fontSize: Math.max(7, Math.round(cfg.base * 8 / 72)),
+              fontSize: Math.max(7, Math.round(base * 8 / 72)),
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
               opacity: 0.5,
