@@ -33,7 +33,7 @@ export function MemoCard({ card, index, total, className }: MemoCardProps) {
       {/* ── Header: coloured gradient, label + counter overlaid ── */}
       <div
         className={cn(
-          "relative shrink-0 h-36 bg-gradient-to-br",
+          "relative shrink-0 h-10 bg-gradient-to-br",
           getGradient(card.category)
         )}
       >
