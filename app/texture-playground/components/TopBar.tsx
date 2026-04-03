@@ -30,7 +30,7 @@ export default function TopBar({ outputSize, onSizeChange, onExportFrame, onExpo
         </button>
       ))}
       <button onClick={onExportFrame} style={{
-        fontFamily: 'var(--font-geist)', fontSize: 18,
+        fontFamily: 'var(--font-geist)', fontSize: 16,
         padding: '12px 16px', borderRadius: 40, border: 'none', cursor: 'pointer',
         background: 'rgba(98,90,34,0.06)', color: '#292929',
       }}>
@@ -40,7 +40,7 @@ export default function TopBar({ outputSize, onSizeChange, onExportFrame, onExpo
         onClick={onExportWebM}
         disabled={exporting}
         style={{
-          fontFamily: 'var(--font-geist)', fontSize: 18,
+          fontFamily: 'var(--font-geist)', fontSize: 16,
           padding: '12px 16px', borderRadius: 40, border: 'none',
           background: '#b2c248', color: '#292929',
           cursor: exporting ? 'wait' : 'pointer', opacity: exporting ? 0.6 : 1,
