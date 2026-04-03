@@ -86,7 +86,10 @@ export default function LeftPanel({
   const adjLayer = snapshot.layers.find(l => l.kind === 'adjustment') as AdjustmentLayer
 
   function toggle(k: keyof typeof open) {
-    setOpen(o => ({ ...o, [k]: !o[k] }))
+    setOpen(o => {
+      const wasOpen = o[k]
+      return { filters: false, texture: false, midground: false, colour: false, [k]: !wasOpen }
+    })
   }
 
   return (
