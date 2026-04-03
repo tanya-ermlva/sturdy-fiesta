@@ -1,6 +1,6 @@
 // app/texture-playground/components/LeftPanel.tsx
 'use client'
-import type { CompositionType, LayerOverride, FrameSnapshot } from '../lib/types'
+import type { CompositionType, LayerOverride, FrameSnapshot, FilterEntry, FilterType } from '../lib/types'
 import CompositionPicker from './controls/CompositionPicker'
 import LayerStack from './controls/LayerStack'
 import LayerControls from './controls/LayerControls'
@@ -16,6 +16,9 @@ type Props = {
   onAddToTimeline: () => void
   activeComposition: CompositionType
   onChangeComposition: (c: CompositionType) => void
+  onAddFilter: (entry: FilterEntry) => void
+  onFilterChange: (filterType: FilterType, changes: Partial<FilterEntry>) => void
+  onRemoveFilter: (filterType: FilterType) => void
 }
 
 const SECTION_LABEL: React.CSSProperties = {
@@ -30,6 +33,7 @@ export default function LeftPanel({
   snapshot, selectedLayerId, onSelectLayer, onLayerChange,
   onAddGridLayer, onDeleteLayer, onAddImageLayer, onAddToTimeline,
   activeComposition, onChangeComposition,
+  onAddFilter, onFilterChange, onRemoveFilter,
 }: Props) {
   const selectedLayer = snapshot.layers.find(l => l.id === selectedLayerId)
 
@@ -54,11 +58,16 @@ export default function LeftPanel({
       </div>
 
       <div style={{ ...SECTION, flex: 1, overflowY: 'auto' }}>
-        <div style={SECTION_LABEL}>Parameters</div>
+        <div style={SECTION_LABEL}>
+          {selectedLayer?.kind === 'adjustment' ? 'Filters' : 'Parameters'}
+        </div>
         {selectedLayer ? (
           <LayerControls
             layer={selectedLayer}
             onChange={(override) => onLayerChange(selectedLayer.id, override)}
+            onAddFilter={onAddFilter}
+            onFilterChange={onFilterChange}
+            onRemoveFilter={onRemoveFilter}
           />
         ) : (
           <span style={{ fontSize: 10, color: '#444' }}>Select a layer</span>

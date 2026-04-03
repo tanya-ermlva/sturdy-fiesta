@@ -1,11 +1,15 @@
 // app/texture-playground/components/controls/LayerControls.tsx
 'use client'
-import type { Layer, LayerOverride } from '../../lib/types'
+import type { Layer, LayerOverride, AdjustmentLayer, FilterEntry, FilterType } from '../../lib/types'
 import ColorPicker from './ColorPicker'
+import FilterStack from './FilterStack'
 
 type Props = {
   layer: Layer
   onChange: (override: LayerOverride) => void
+  onAddFilter: (entry: FilterEntry) => void
+  onFilterChange: (filterType: FilterType, changes: Partial<FilterEntry>) => void
+  onRemoveFilter: (filterType: FilterType) => void
 }
 
 type SliderProps = {
@@ -34,7 +38,18 @@ function Slider({ label, value, min, max, step, unit = '', onChange }: SliderPro
   )
 }
 
-export default function LayerControls({ layer, onChange }: Props) {
+export default function LayerControls({ layer, onChange, onAddFilter, onFilterChange, onRemoveFilter }: Props) {
+  if (layer.kind === 'adjustment') {
+    return (
+      <FilterStack
+        layer={layer}
+        onAdd={onAddFilter}
+        onChange={onFilterChange}
+        onRemove={onRemoveFilter}
+      />
+    )
+  }
+
   if (layer.kind === 'background') {
     return (
       <div>
