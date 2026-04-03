@@ -33,7 +33,6 @@ export default function TexturePlaygroundClient() {
   const [project, setProject] = useState<Project>(DEFAULT_PROJECT)
   const adapterRef = useRef<RendererAdapter | null>(null)
   const [adapter, setAdapter] = useState<RendererAdapter | null>(null)
-  usePlayback(adapter, project, playing, () => setPlaying(false))
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
   const snapshot = resolveFrame(project.base, activeFrame)
 
@@ -41,6 +40,7 @@ export default function TexturePlaygroundClient() {
   const [activeComposition, setActiveComposition] = useState<CompositionType>('dot-grid')
   const [exporting, setExporting] = useState(false)
   const [playing, setPlaying] = useState(false)
+  usePlayback(adapter, project, playing, () => setPlaying(false))
 
   function handleLayerChange(layerId: string, override: LayerOverride) {
     setProject(p => ({

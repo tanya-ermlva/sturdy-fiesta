@@ -15,6 +15,7 @@ export function usePlayback(
     if (!playing || !adapter) return
     stopRef.current = false
 
+    const activeAdapter = adapter  // capture non-null for use inside async runLoop
     let frameIdx = 0
     let rafId: number
 
@@ -22,7 +23,7 @@ export function usePlayback(
       while (!stopRef.current) {
         const frame = project.frames[frameIdx % project.frames.length]
         const snapshot = resolveFrame(project.base, frame)
-        adapter.renderFrame(snapshot)
+        activeAdapter.renderFrame(snapshot)
         const holdMs = (frame.durationFrames / project.fps) * 1000
         await new Promise<void>((resolve) => {
           const start = performance.now()
