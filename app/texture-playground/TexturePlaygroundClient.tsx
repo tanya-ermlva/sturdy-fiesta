@@ -8,6 +8,8 @@ import LeftPanel from './components/LeftPanel'
 import TopBar from './components/TopBar'
 import Timeline from './components/Timeline'
 import { resolveFrame } from './lib/resolve'
+import { usePlayback } from './lib/playback'
+import { exportWebMDeterministic, exportFramePng } from './lib/export'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
@@ -31,6 +33,7 @@ export default function TexturePlaygroundClient() {
   const [project, setProject] = useState<Project>(DEFAULT_PROJECT)
   const adapterRef = useRef<RendererAdapter | null>(null)
   const [adapter, setAdapter] = useState<RendererAdapter | null>(null)
+  usePlayback(adapter, project, playing, () => setPlaying(false))
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
   const snapshot = resolveFrame(project.base, activeFrame)
 
@@ -99,8 +102,22 @@ export default function TexturePlaygroundClient() {
     }))
   }
 
-  async function handleExportFrame() { /* wired in Task 16 */ }
-  async function handleExportWebM() { /* wired in Task 16 */ }
+  async function handleExportFrame() {
+    if (!adapterRef.current) return
+    await exportFramePng(adapterRef.current)
+  }
+
+  async function handleExportWebM() {
+    if (!adapterRef.current) return
+    const canvas = document.querySelector('canvas') as HTMLCanvasElement | null
+    if (!canvas) return
+    setExporting(true)
+    try {
+      await exportWebMDeterministic(canvas, adapterRef.current, project)
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div
