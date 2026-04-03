@@ -19,10 +19,12 @@
     "lucide-react": "^0.563.0",
     "motion": "^12.34.0",
     "next": "^16.1.4",
+    "pixi.js": "^8.17.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwind-merge": "^3.4.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "webm-muxer": "^5.1.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
