@@ -80,6 +80,8 @@ export default function Timeline({
           background: '#f7f7f2', color: '#292929', fontSize: 22,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0, alignSelf: 'center',
+          opacity: frames.length >= 5 ? 0.3 : 1,
+          pointerEvents: frames.length >= 5 ? 'none' : 'auto',
         }}
       >+</button>
 
