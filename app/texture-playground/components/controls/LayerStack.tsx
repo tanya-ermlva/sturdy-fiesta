@@ -12,8 +12,19 @@ type Props = {
   onAddImage: (file: File) => void
 }
 
+const COLOR_NAMES: Record<string, string> = {
+  '#434625': 'dark olive',
+  '#788C15': 'mid olive',
+  '#B2C248': 'lime',
+  '#E5EACD': 'pale sage',
+  '#4691E2': 'blue',
+  '#FF91E0': 'pink',
+  '#ED9212': 'amber',
+  '#A191CE': 'purple',
+}
+
 function layerLabel(layer: Layer): string {
-  if (layer.kind === 'background') return 'Background'
+  if (layer.kind === 'background') return COLOR_NAMES[layer.color] ?? layer.color
   if (layer.kind === 'grid') return layer.composition.replace(/-/g, ' ')
   if (layer.kind === 'adjustment') return 'Adjustments'
   return 'Image'

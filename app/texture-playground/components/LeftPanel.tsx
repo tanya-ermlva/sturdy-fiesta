@@ -1,7 +1,6 @@
 // app/texture-playground/components/LeftPanel.tsx
 'use client'
-import type { CompositionType, LayerOverride, FrameSnapshot, FilterEntry, FilterType } from '../lib/types'
-import CompositionPicker from './controls/CompositionPicker'
+import type { LayerOverride, FrameSnapshot, FilterEntry, FilterType } from '../lib/types'
 import LayerStack from './controls/LayerStack'
 import LayerControls from './controls/LayerControls'
 
@@ -10,12 +9,10 @@ type Props = {
   selectedLayerId: string
   onSelectLayer: (id: string) => void
   onLayerChange: (layerId: string, override: LayerOverride) => void
-  onAddGridLayer: (composition: CompositionType) => void
+  onAddGridLayer: () => void
   onDeleteLayer: (id: string) => void
   onAddImageLayer: (file: File) => void
   onAddToTimeline: () => void
-  activeComposition: CompositionType
-  onChangeComposition: (c: CompositionType) => void
   onAddFilter: (entry: FilterEntry) => void
   onFilterChange: (filterType: FilterType, changes: Partial<FilterEntry>) => void
   onRemoveFilter: (filterType: FilterType) => void
@@ -32,7 +29,6 @@ const SECTION: React.CSSProperties = {
 export default function LeftPanel({
   snapshot, selectedLayerId, onSelectLayer, onLayerChange,
   onAddGridLayer, onDeleteLayer, onAddImageLayer, onAddToTimeline,
-  activeComposition, onChangeComposition,
   onAddFilter, onFilterChange, onRemoveFilter,
 }: Props) {
   const selectedLayer = snapshot.layers.find(l => l.id === selectedLayerId)
@@ -41,17 +37,12 @@ export default function LeftPanel({
     <div style={{ width: 192, background: '#111', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
 
       <div style={SECTION}>
-        <div style={SECTION_LABEL}>Composition</div>
-        <CompositionPicker value={activeComposition} onChange={onChangeComposition} />
-      </div>
-
-      <div style={SECTION}>
         <div style={SECTION_LABEL}>Layers</div>
         <LayerStack
           layers={snapshot.layers}
           selectedId={selectedLayerId}
           onSelect={onSelectLayer}
-          onAdd={() => onAddGridLayer(activeComposition)}
+          onAdd={onAddGridLayer}
           onDelete={onDeleteLayer}
           onAddImage={onAddImageLayer}
         />

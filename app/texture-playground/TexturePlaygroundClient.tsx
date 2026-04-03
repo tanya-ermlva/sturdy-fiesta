@@ -37,11 +37,6 @@ export default function TexturePlaygroundClient() {
   const snapshot = resolveFrame(activeFrame)
 
   const [selectedLayerId, setSelectedLayerId] = useState('g1')
-  const [activeComposition, setActiveComposition] = useState<CompositionType>('dot-grid')
-  // Derive what the composition picker should display from the resolved active frame
-  const selectedLayerResolved = snapshot.layers.find(l => l.id === selectedLayerId)
-  const pickerComposition: CompositionType =
-    selectedLayerResolved?.kind === 'grid' ? selectedLayerResolved.composition : activeComposition
   const [exporting, setExporting] = useState(false)
   const [playing, setPlaying] = useState(false)
   usePlayback(adapter, project, playing, () => setPlaying(false))
@@ -232,18 +227,13 @@ export default function TexturePlaygroundClient() {
           selectedLayerId={selectedLayerId}
           onSelectLayer={setSelectedLayerId}
           onLayerChange={handleLayerChange}
-          onAddGridLayer={handleAddGridLayer}
+          onAddGridLayer={() => handleAddGridLayer('dot-grid')}
           onDeleteLayer={handleDeleteLayer}
           onAddImageLayer={handleAddImageLayer}
           onAddToTimeline={handleAddToTimeline}
           onAddFilter={handleAddFilter}
           onFilterChange={handleFilterChange}
           onRemoveFilter={handleRemoveFilter}
-          activeComposition={pickerComposition}
-          onChangeComposition={(c) => {
-            setActiveComposition(c)
-            if (selectedLayerResolved?.kind === 'grid') handleLayerChange(selectedLayerId, { composition: c })
-          }}
         />
 
         <CanvasPreview

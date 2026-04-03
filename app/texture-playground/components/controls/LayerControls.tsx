@@ -2,6 +2,7 @@
 'use client'
 import type { Layer, LayerOverride, AdjustmentLayer, FilterEntry, FilterType } from '../../lib/types'
 import ColorPicker from './ColorPicker'
+import CompositionPicker from './CompositionPicker'
 import FilterStack from './FilterStack'
 
 type Props = {
@@ -73,6 +74,10 @@ export default function LayerControls({ layer, onChange, onAddFilter, onFilterCh
   // grid layer
   return (
     <div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontFamily: 'var(--font-geist)', fontSize: 10, color: '#555', marginBottom: 8 }}>Composition</div>
+        <CompositionPicker value={layer.composition} onChange={(c) => onChange({ composition: c })} />
+      </div>
       <Slider label="Spacing" value={layer.spacing} min={4} max={120} step={1} unit="px" onChange={(v) => onChange({ spacing: v })} />
       {layer.composition === 'dot-grid' && (
         <Slider label="Dot size" value={layer.dotSize} min={1} max={20} step={0.5} unit="px" onChange={(v) => onChange({ dotSize: v })} />
