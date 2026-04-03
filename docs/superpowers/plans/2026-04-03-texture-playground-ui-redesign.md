@@ -707,7 +707,7 @@ Replace the entire file with:
 'use client'
 import type { MidgroundLayer } from '../../lib/types'
 
-const BUILT_INS = Array.from({ length: 11 }, (_, i) => ({
+const BUILT_INS = Array.from({ length: 9 }, (_, i) => ({
   src: `/textures/midground/${i + 1}.png`,
   label: String(i + 1),
 }))
