@@ -15,9 +15,11 @@ function ensureChildAt(stage: Container, child: Container, index: number): void 
 export class PixiRenderer implements RendererAdapter {
   private app: Application | null = null
   private layerGraphics = new Map<string, Graphics | Sprite>()
+  private layerUrls = new Map<string, string>()
   private size = 512
 
   async init(host: HTMLElement, size: number): Promise<void> {
+    if (this.app) return
     this.size = size
     this.app = new Application()
     await this.app.init({
@@ -38,11 +40,13 @@ export class PixiRenderer implements RendererAdapter {
     const snapshotIds = new Set(snapshot.layers.map((l) => l.id))
 
     // Remove graphics for layers that no longer exist
-    for (const [id, g] of this.layerGraphics) {
+    for (const id of [...this.layerGraphics.keys()]) {
       if (!snapshotIds.has(id)) {
+        const g = this.layerGraphics.get(id)!
         stage.removeChild(g)
         g.destroy()
         this.layerGraphics.delete(id)
+        this.layerUrls.delete(id)
       }
     }
 
@@ -71,18 +75,21 @@ export class PixiRenderer implements RendererAdapter {
       }
 
       if (layer.kind === 'image') {
-        // Image layers: create a Sprite from the objectUrl
-        let sprite = this.layerGraphics.get(layer.id) as Sprite | undefined
-        if (!sprite) {
+        const existingSprite = this.layerGraphics.get(layer.id) as Sprite | undefined
+        const prevUrl = this.layerUrls.get(layer.id)
+        let sprite = existingSprite
+        if (!sprite || prevUrl !== layer.objectUrl) {
+          existingSprite?.destroy()
           const tex = Texture.from(layer.objectUrl)
           sprite = new Sprite(tex)
           this.layerGraphics.set(layer.id, sprite)
+          this.layerUrls.set(layer.id, layer.objectUrl)
         }
         sprite.alpha = layer.opacity
         sprite.scale.set(layer.scale)
         sprite.x = layer.x
         sprite.y = layer.y
-        ensureChildAt(stage, sprite, index)
+        ensureChildAt(stage, sprite, Math.min(index, stage.children.length))
       }
     })
   }
@@ -95,14 +102,13 @@ export class PixiRenderer implements RendererAdapter {
 
   async exportPng(): Promise<Blob> {
     if (!this.app) throw new Error('Renderer not initialised')
-    // In PixiJS v8, extract.canvas() returns ICanvas (toBlob is optional).
-    // Use extract.base64() which is async and reliable across renderers.
     const base64 = await this.app.renderer.extract.base64({
       target: this.app.stage,
       format: 'png',
     })
-    const res = await fetch(base64)
-    return res.blob()
+    const [, data] = base64.split(',')
+    const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0))
+    return new Blob([bytes], { type: 'image/png' })
   }
 
   destroy(): void {
@@ -110,6 +116,7 @@ export class PixiRenderer implements RendererAdapter {
       g.destroy()
     }
     this.layerGraphics.clear()
+    this.layerUrls.clear()
     this.app?.destroy(true)
     this.app = null
   }
