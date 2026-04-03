@@ -55,7 +55,7 @@ export class PixiRenderer implements RendererAdapter {
       }
     }
 
-    // Render layers bottom-to-top
+    // Render layers bottom-to-top, then flush to canvas immediately
     snapshot.layers.forEach((layer, index) => {
       if (layer.kind === 'background') {
         let g = this.layerGraphics.get(layer.id) as Graphics | undefined
@@ -97,6 +97,11 @@ export class PixiRenderer implements RendererAdapter {
         ensureChildAt(stage, sprite, Math.min(index, stage.children.length))
       }
     })
+
+    // Flush display-object changes to the WebGL canvas immediately.
+    // Without this, rendering is deferred to the auto-ticker and the canvas
+    // may be blank when read back during export.
+    this.app.renderer.render(this.app.stage)
   }
 
   setSize(size: number): void {

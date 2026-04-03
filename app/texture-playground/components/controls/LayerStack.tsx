@@ -1,6 +1,7 @@
 // app/texture-playground/components/controls/LayerStack.tsx
 'use client'
 import type { Layer } from '../../lib/types'
+import CompositionIcon, { type LayerIconType } from './CompositionIcon'
 
 type Props = {
   layers: Layer[]
@@ -12,47 +13,51 @@ type Props = {
 }
 
 function layerLabel(layer: Layer): string {
-  if (layer.kind === 'background') return `BG · ${layer.color}`
-  if (layer.kind === 'grid') return layer.composition.replace('-', ' ')
+  if (layer.kind === 'background') return 'Background'
+  if (layer.kind === 'grid') return layer.composition.replace(/-/g, ' ')
   return 'Image'
 }
 
-function layerDot(layer: Layer): string {
-  if (layer.kind === 'background') return layer.color
-  if (layer.kind === 'grid') return '#D1E043'
-  return '#4691E2'
+function layerIconType(layer: Layer): LayerIconType {
+  if (layer.kind === 'background') return 'background'
+  if (layer.kind === 'image') return 'image'
+  return layer.composition
 }
 
 export default function LayerStack({ layers, selectedId, onSelect, onAdd, onDelete, onAddImage }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[...layers].reverse().map((layer) => (
-        <div
-          key={layer.id}
-          onClick={() => onSelect(layer.id)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 7,
-            padding: '6px 8px', borderRadius: 5, cursor: 'pointer',
-            background: selectedId === layer.id ? '#161616' : 'transparent',
-            color: selectedId === layer.id ? '#e8e8e8' : '#666',
-            fontSize: 11, fontFamily: 'var(--font-geist)',
-          }}
-        >
-          <div style={{ width: 10, height: 10, borderRadius: 2, background: layerDot(layer), flexShrink: 0 }} />
-          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {layerLabel(layer)}
-          </span>
-          {layer.kind !== 'background' && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(layer.id) }}
-              style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 12, padding: 0, lineHeight: 1 }}
-              title="Delete layer"
-            >
-              ×
-            </button>
-          )}
-        </div>
-      ))}
+      {[...layers].reverse().map((layer) => {
+        const selected = selectedId === layer.id
+        const iconColor = selected ? '#c8d83a' : '#444'
+        return (
+          <div
+            key={layer.id}
+            onClick={() => onSelect(layer.id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '6px 8px', borderRadius: 5, cursor: 'pointer',
+              background: selected ? '#161616' : 'transparent',
+              color: selected ? '#e8e8e8' : '#666',
+              fontSize: 11, fontFamily: 'var(--font-geist)',
+            }}
+          >
+            <CompositionIcon type={layerIconType(layer)} size={14} color={iconColor} />
+            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {layerLabel(layer)}
+            </span>
+            {layer.kind !== 'background' && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(layer.id) }}
+                style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 12, padding: 0, lineHeight: 1 }}
+                title="Delete layer"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )
+      })}
       <button
         onClick={onAdd}
         style={{

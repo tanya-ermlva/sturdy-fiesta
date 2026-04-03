@@ -27,7 +27,7 @@ export async function exportWebMFast(
 
   // Play exactly one full cycle
   for (const frame of project.frames) {
-    const snapshot = resolveFrame(project.base, frame)
+    const snapshot = resolveFrame(frame)
     adapter.renderFrame(snapshot)
     await new Promise<void>((resolve) => setTimeout(resolve, (frame.durationFrames / project.fps) * 1000))
   }
@@ -40,12 +40,11 @@ export async function exportWebMFast(
 // ── Deterministic export (WebCodecs + webm-muxer) ────────────────────────────
 
 export async function exportWebMDeterministic(
-  canvas: HTMLCanvasElement,
   adapter: RendererAdapter,
   project: Project,
 ): Promise<void> {
   const { Muxer, ArrayBufferTarget } = await import('webm-muxer')
-  const { outputSize, fps, base, frames } = project
+  const { outputSize, fps, frames } = project
 
   const target = new ArrayBufferTarget()
   const muxer = new Muxer({
@@ -63,17 +62,21 @@ export async function exportWebMDeterministic(
   const frameDurationUs = (1 / fps) * 1_000_000
 
   for (const frame of frames) {
-    const snapshot = resolveFrame(base, frame)
+    const snapshot = resolveFrame(frame)
     adapter.renderFrame(snapshot)
 
+    // Extract via Pixi's render target — safe across await boundaries, unlike
+    // reading the WebGL display buffer which is cleared after each frame swap.
+    const blob = await adapter.exportPng()
+    const bitmap = await createImageBitmap(blob)
+
     for (let tick = 0; tick < frame.durationFrames; tick++) {
-      const bitmap = await createImageBitmap(canvas)
       const videoFrame = new VideoFrame(bitmap, { timestamp: timestampUs, duration: frameDurationUs })
       encoder.encode(videoFrame, { keyFrame: tick === 0 })
       videoFrame.close()
-      bitmap.close()
       timestampUs += frameDurationUs
     }
+    bitmap.close()
   }
 
   await encoder.flush()

@@ -22,7 +22,7 @@ export function usePlayback(
     async function runLoop() {
       while (!stopRef.current) {
         const frame = project.frames[frameIdx % project.frames.length]
-        const snapshot = resolveFrame(project.base, frame)
+        const snapshot = resolveFrame(frame)
         activeAdapter.renderFrame(snapshot)
         const holdMs = (frame.durationFrames / project.fps) * 1000
         await new Promise<void>((resolve) => {

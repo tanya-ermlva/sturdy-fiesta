@@ -1,12 +1,12 @@
 // app/texture-playground/components/LeftPanel.tsx
 'use client'
-import type { Layer, Project, CompositionType, LayerOverride } from '../lib/types'
+import type { CompositionType, LayerOverride, FrameSnapshot } from '../lib/types'
 import CompositionPicker from './controls/CompositionPicker'
 import LayerStack from './controls/LayerStack'
 import LayerControls from './controls/LayerControls'
 
 type Props = {
-  project: Project
+  snapshot: FrameSnapshot
   selectedLayerId: string
   onSelectLayer: (id: string) => void
   onLayerChange: (layerId: string, override: LayerOverride) => void
@@ -27,11 +27,11 @@ const SECTION: React.CSSProperties = {
 }
 
 export default function LeftPanel({
-  project, selectedLayerId, onSelectLayer, onLayerChange,
+  snapshot, selectedLayerId, onSelectLayer, onLayerChange,
   onAddGridLayer, onDeleteLayer, onAddImageLayer, onAddToTimeline,
   activeComposition, onChangeComposition,
 }: Props) {
-  const selectedLayer = project.base.layers.find(l => l.id === selectedLayerId)
+  const selectedLayer = snapshot.layers.find(l => l.id === selectedLayerId)
 
   return (
     <div style={{ width: 192, background: '#111', borderRight: '1px solid #1e1e1e', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
@@ -44,7 +44,7 @@ export default function LeftPanel({
       <div style={SECTION}>
         <div style={SECTION_LABEL}>Layers</div>
         <LayerStack
-          layers={project.base.layers}
+          layers={snapshot.layers}
           selectedId={selectedLayerId}
           onSelect={onSelectLayer}
           onAdd={() => onAddGridLayer(activeComposition)}

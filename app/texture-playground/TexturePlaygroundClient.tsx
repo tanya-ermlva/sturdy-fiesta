@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { nanoid } from 'nanoid'
-import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride } from './lib/types'
+import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride, Frame } from './lib/types'
 import CanvasPreview from './components/CanvasPreview'
 import LeftPanel from './components/LeftPanel'
 import TopBar from './components/TopBar'
@@ -14,15 +14,14 @@ import { exportWebMDeterministic, exportFramePng } from './lib/export'
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
+const DEFAULT_LAYERS: Layer[] = [
+  { id: 'bg', kind: 'background', color: '#434625' },
+  { id: 'g1', kind: 'grid', composition: 'dot-grid', spacing: 18, thickness: 1, dotSize: 3, opacity: 1, scale: 1 },
+]
+
 const DEFAULT_PROJECT: Project = {
-  base: {
-    layers: [
-      { id: 'bg', kind: 'background', color: '#434625' },
-      { id: 'g1', kind: 'grid', composition: 'dot-grid', spacing: 18, thickness: 1, dotSize: 3, opacity: 1, scale: 1 },
-    ],
-  },
   frames: [
-    { id: 'f1', layerOverrides: {}, durationFrames: 5 },
+    { id: 'f1', layers: DEFAULT_LAYERS, durationFrames: 5 },
   ],
   outputSize: 1024,
   fps: 30,
@@ -34,10 +33,14 @@ export default function TexturePlaygroundClient() {
   const adapterRef = useRef<RendererAdapter | null>(null)
   const [adapter, setAdapter] = useState<RendererAdapter | null>(null)
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
-  const snapshot = resolveFrame(project.base, activeFrame)
+  const snapshot = resolveFrame(activeFrame)
 
   const [selectedLayerId, setSelectedLayerId] = useState('g1')
   const [activeComposition, setActiveComposition] = useState<CompositionType>('dot-grid')
+  // Derive what the composition picker should display from the resolved active frame
+  const selectedLayerResolved = snapshot.layers.find(l => l.id === selectedLayerId)
+  const pickerComposition: CompositionType =
+    selectedLayerResolved?.kind === 'grid' ? selectedLayerResolved.composition : activeComposition
   const [exporting, setExporting] = useState(false)
   const [playing, setPlaying] = useState(false)
   usePlayback(adapter, project, playing, () => setPlaying(false))
@@ -45,9 +48,12 @@ export default function TexturePlaygroundClient() {
   function handleLayerChange(layerId: string, override: LayerOverride) {
     setProject(p => ({
       ...p,
-      base: {
-        layers: p.base.layers.map(l => l.id === layerId ? { ...l, ...override } as Layer : l)
-      }
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : {
+          ...f,
+          layers: f.layers.map(l => l.id === layerId ? { ...l, ...override } as Layer : l),
+        }
+      ),
     }))
   }
 
@@ -56,16 +62,25 @@ export default function TexturePlaygroundClient() {
       id: nanoid(6), kind: 'grid', composition,
       spacing: 20, thickness: 1, dotSize: 3, opacity: 1, scale: 1,
     }
-    setProject(p => ({ ...p, base: { layers: [...p.base.layers, newLayer] } }))
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : { ...f, layers: [...f.layers, newLayer] }
+      ),
+    }))
     setSelectedLayerId(newLayer.id)
   }
 
   function handleDeleteLayer(layerId: string) {
-    setProject(p => {
-      const layer = p.base.layers.find(l => l.id === layerId)
-      if (layer?.kind === 'image') URL.revokeObjectURL(layer.objectUrl)
-      return { ...p, base: { layers: p.base.layers.filter(l => l.id !== layerId) } }
-    })
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f => {
+        if (f.id !== p.activeFrameId) return f
+        const layer = f.layers.find(l => l.id === layerId)
+        if (layer?.kind === 'image') URL.revokeObjectURL(layer.objectUrl)
+        return { ...f, layers: f.layers.filter(l => l.id !== layerId) }
+      }),
+    }))
     setSelectedLayerId(prev => prev === layerId ? 'bg' : prev)
   }
 
@@ -75,21 +90,35 @@ export default function TexturePlaygroundClient() {
       id: nanoid(6), kind: 'image', file, objectUrl,
       scale: 1, x: 0, y: 0, opacity: 1,
     }
-    setProject(p => ({ ...p, base: { layers: [...p.base.layers, newLayer] } }))
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : { ...f, layers: [...f.layers, newLayer] }
+      ),
+    }))
     setSelectedLayerId(newLayer.id)
   }
 
   function handleAddToTimeline() {
-    const newFrame = { id: nanoid(6), layerOverrides: {}, durationFrames: 5 }
-    setProject(p => ({
-      ...p,
-      frames: [...p.frames.slice(0, 4), newFrame],
-      activeFrameId: newFrame.id,
-    }))
+    setProject(p => {
+      const currentFrame = p.frames.find(f => f.id === p.activeFrameId) ?? p.frames[0]
+      const newFrame: Frame = {
+        id: nanoid(6),
+        layers: currentFrame.layers.map(l => ({ ...l })),  // shallow-copy each layer
+        durationFrames: 5,
+      }
+      return {
+        ...p,
+        frames: [...p.frames.slice(0, 4), newFrame],
+        activeFrameId: newFrame.id,
+      }
+    })
   }
 
   function handleDeleteFrame(frameId: string) {
     setProject(p => {
+      const frame = p.frames.find(f => f.id === frameId)
+      frame?.layers.forEach(l => { if (l.kind === 'image') URL.revokeObjectURL(l.objectUrl) })
       const frames = p.frames.filter(f => f.id !== frameId)
       return { ...p, frames, activeFrameId: frames[0]?.id ?? p.activeFrameId }
     })
@@ -109,11 +138,9 @@ export default function TexturePlaygroundClient() {
 
   async function handleExportWebM() {
     if (!adapterRef.current) return
-    const canvas = document.querySelector('canvas') as HTMLCanvasElement | null
-    if (!canvas) return
     setExporting(true)
     try {
-      await exportWebMDeterministic(canvas, adapterRef.current, project)
+      await exportWebMDeterministic(adapterRef.current, project)
     } finally {
       setExporting(false)
     }
@@ -143,7 +170,7 @@ export default function TexturePlaygroundClient() {
       {/* Main area */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <LeftPanel
-          project={project}
+          snapshot={snapshot}
           selectedLayerId={selectedLayerId}
           onSelectLayer={setSelectedLayerId}
           onLayerChange={handleLayerChange}
@@ -151,8 +178,11 @@ export default function TexturePlaygroundClient() {
           onDeleteLayer={handleDeleteLayer}
           onAddImageLayer={handleAddImageLayer}
           onAddToTimeline={handleAddToTimeline}
-          activeComposition={activeComposition}
-          onChangeComposition={setActiveComposition}
+          activeComposition={pickerComposition}
+          onChangeComposition={(c) => {
+            setActiveComposition(c)
+            if (selectedLayerResolved?.kind === 'grid') handleLayerChange(selectedLayerId, { composition: c })
+          }}
         />
 
         <CanvasPreview

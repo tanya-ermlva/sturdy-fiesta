@@ -38,20 +38,16 @@ export type ImageLayer = {
 
 export type Layer = BackgroundLayer | GridLayer | ImageLayer
 
+// Used by LayerControls onChange callbacks — partial properties to apply to a layer
 export type LayerOverride = Partial<Omit<GridLayer | BackgroundLayer | ImageLayer, 'id' | 'kind' | 'file'>>
 
 export type Frame = {
   id: string
-  layerOverrides: Record<string, LayerOverride>  // keyed by layer.id
-  durationFrames: number                          // e.g. 5 @ 30fps = 167ms
-}
-
-export type BaseComposition = {
-  layers: Layer[]
+  layers: Layer[]        // each frame owns its full, independent layer stack
+  durationFrames: number
 }
 
 export type Project = {
-  base: BaseComposition
   frames: Frame[]               // 1–5
   outputSize: 512 | 1024 | 2048
   fps: number
