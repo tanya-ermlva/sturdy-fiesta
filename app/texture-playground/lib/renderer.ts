@@ -1,12 +1,20 @@
 // app/texture-playground/lib/renderer.ts
 'use client'
-import { Application, Graphics, Sprite, Texture } from 'pixi.js'
+import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { drawBackground, drawGridLayer } from './draw'
 import type { FrameSnapshot, RendererAdapter } from './types'
 
+function ensureChildAt(stage: Container, child: Container, index: number): void {
+  if (child.parent === stage) {
+    stage.setChildIndex(child, Math.min(index, stage.children.length - 1))
+  } else {
+    stage.addChildAt(child, Math.min(index, stage.children.length))
+  }
+}
+
 export class PixiRenderer implements RendererAdapter {
   private app: Application | null = null
-  private layerGraphics = new Map<string, Graphics>()
+  private layerGraphics = new Map<string, Graphics | Sprite>()
   private size = 512
 
   async init(host: HTMLElement, size: number): Promise<void> {
@@ -41,40 +49,40 @@ export class PixiRenderer implements RendererAdapter {
     // Render layers bottom-to-top
     snapshot.layers.forEach((layer, index) => {
       if (layer.kind === 'background') {
-        let g = this.layerGraphics.get(layer.id)
+        let g = this.layerGraphics.get(layer.id) as Graphics | undefined
         if (!g) {
           g = new Graphics()
           this.layerGraphics.set(layer.id, g)
         }
         drawBackground(g, layer.color, size)
-        stage.addChildAt(g, index)
+        ensureChildAt(stage, g, index)
         return
       }
 
       if (layer.kind === 'grid') {
-        let g = this.layerGraphics.get(layer.id)
+        let g = this.layerGraphics.get(layer.id) as Graphics | undefined
         if (!g) {
           g = new Graphics()
           this.layerGraphics.set(layer.id, g)
         }
         drawGridLayer(g, layer, size)
-        stage.addChildAt(g, Math.min(index, stage.children.length))
+        ensureChildAt(stage, g, index)
         return
       }
 
       if (layer.kind === 'image') {
         // Image layers: create a Sprite from the objectUrl
-        let sprite = this.layerGraphics.get(layer.id) as unknown as Sprite | undefined
+        let sprite = this.layerGraphics.get(layer.id) as Sprite | undefined
         if (!sprite) {
           const tex = Texture.from(layer.objectUrl)
           sprite = new Sprite(tex)
-          this.layerGraphics.set(layer.id, sprite as unknown as Graphics)
+          this.layerGraphics.set(layer.id, sprite)
         }
         sprite.alpha = layer.opacity
         sprite.scale.set(layer.scale)
         sprite.x = layer.x
         sprite.y = layer.y
-        stage.addChildAt(sprite, Math.min(index, stage.children.length))
+        ensureChildAt(stage, sprite, index)
       }
     })
   }
