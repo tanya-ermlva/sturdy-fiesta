@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { nanoid } from 'nanoid'
-import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride, Frame, FilterEntry, FilterType } from './lib/types'
+import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, MidgroundLayer, LayerOverride, Frame, FilterEntry, FilterType } from './lib/types'
 import CanvasPreview from './components/CanvasPreview'
 import LeftPanel from './components/LeftPanel'
 import TopBar from './components/TopBar'
@@ -15,9 +15,9 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const DEFAULT_LAYERS: Layer[] = [
-  { id: 'bg', kind: 'background', color: '#434625' },
-  { id: 'g1', kind: 'grid', composition: 'dot-grid', spacing: 18, thickness: 1, dotSize: 3, opacity: 1, scale: 1 },
-  { id: 'adj', kind: 'adjustment', filters: [] },
+  { id: 'bg',  kind: 'background',  color: '#434625' },
+  { id: 'mid', kind: 'midground',   src: null, label: '', opacity: 1, scale: 1, x: 0, y: 0 },
+  { id: 'adj', kind: 'adjustment',  filters: [] },
 ]
 
 const DEFAULT_PROJECT: Project = {
@@ -36,7 +36,7 @@ export default function TexturePlaygroundClient() {
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
   const snapshot = resolveFrame(activeFrame)
 
-  const [selectedLayerId, setSelectedLayerId] = useState('g1')
+  const [selectedLayerId, setSelectedLayerId] = useState('mid')
   const [exporting, setExporting] = useState(false)
   const [playing, setPlaying] = useState(false)
   usePlayback(adapter, project, playing, () => setPlaying(false))
@@ -157,8 +157,8 @@ export default function TexturePlaygroundClient() {
       const currentFrame = p.frames.find(f => f.id === p.activeFrameId) ?? p.frames[0]
       const newFrame: Frame = {
         id: nanoid(6),
-        layers: currentFrame.layers.map(l => ({ ...l })),  // shallow-copy each layer
-        durationFrames: 5,
+        layers: currentFrame.layers.map(l => ({ ...l, id: nanoid(6) })),
+        durationFrames: currentFrame.durationFrames,
       }
       return {
         ...p,
