@@ -80,50 +80,47 @@ export default function FilterStack({ layer, onAdd, onChange, onRemove }: Props)
         </div>
       ))}
 
-      {/* Add filter button + picker */}
-      <div style={{ position: 'relative' }}>
-        <button
-          onClick={() => setPickerOpen((o) => !o)}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', gap: 6,
-            padding: '6px 8px', borderRadius: 5, cursor: 'pointer',
-            background: 'none', border: '1px dashed #222', color: '#333',
-            fontSize: 10, fontFamily: 'var(--font-geist)',
-          }}
-        >
-          <span style={{ fontSize: 14, lineHeight: 1 }}>+</span> Add filter
-        </button>
+      {/* Add filter button + inline picker */}
+      <button
+        onClick={() => setPickerOpen((o) => !o)}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 6,
+          padding: '6px 8px', borderRadius: 5, cursor: 'pointer',
+          background: 'none', border: `1px dashed ${pickerOpen ? '#444' : '#222'}`, color: '#444',
+          fontSize: 10, fontFamily: 'var(--font-geist)',
+        }}
+      >
+        <span style={{ fontSize: 14, lineHeight: 1 }}>{pickerOpen ? '−' : '+'}</span> Add filter
+      </button>
 
-        {pickerOpen && (
-          <div style={{
-            position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: 4,
-            background: '#111', border: '1px solid #222', borderRadius: 6,
-            padding: 6, display: 'flex', flexDirection: 'column', gap: 2, zIndex: 10,
-          }}>
-            {(Object.keys(FILTER_DEFAULTS) as FilterType[]).map((type) => {
-              const active = activeTypes.has(type)
-              return (
-                <button
-                  key={type}
-                  disabled={active}
-                  onClick={() => { onAdd(FILTER_DEFAULTS[type]); setPickerOpen(false) }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 7,
-                    padding: '5px 8px', borderRadius: 4, border: 'none',
-                    background: active ? 'transparent' : '#161616',
-                    color: active ? '#333' : '#888',
-                    fontSize: 10, fontFamily: 'var(--font-geist)',
-                    cursor: active ? 'default' : 'pointer', textAlign: 'left',
-                  }}
-                >
-                  {FILTER_LABELS[type]}
-                  {active && <span style={{ marginLeft: 'auto', fontSize: 8, color: '#333' }}>active</span>}
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </div>
+      {pickerOpen && (
+        <div style={{
+          border: '1px solid #1e1e1e', borderRadius: 6,
+          padding: 4, display: 'flex', flexDirection: 'column', gap: 1,
+        }}>
+          {(Object.keys(FILTER_DEFAULTS) as FilterType[]).map((type) => {
+            const active = activeTypes.has(type)
+            return (
+              <button
+                key={type}
+                disabled={active}
+                onClick={() => { onAdd(FILTER_DEFAULTS[type]); setPickerOpen(false) }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  padding: '5px 8px', borderRadius: 4, border: 'none',
+                  background: 'none',
+                  color: active ? '#2e2e2e' : '#666',
+                  fontSize: 10, fontFamily: 'var(--font-geist)',
+                  cursor: active ? 'default' : 'pointer', textAlign: 'left',
+                }}
+              >
+                {FILTER_LABELS[type]}
+                {active && <span style={{ marginLeft: 'auto', fontSize: 8, color: '#2e2e2e' }}>active</span>}
+              </button>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
