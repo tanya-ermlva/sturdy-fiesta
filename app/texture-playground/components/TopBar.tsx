@@ -21,11 +21,18 @@ export default function TopBar({ outputSize, onSizeChange, onExportFrame, onExpo
     }}>
       {SIZES.map(s => (
         <button key={s} onClick={() => onSizeChange(s)} style={{
-          fontFamily: 'var(--font-geist)', fontSize: 18,
-          padding: '12px 16px', borderRadius: 40, border: 'none', cursor: 'pointer',
+          fontFamily: 'var(--font-geist-mono)', fontSize: 12,
+          padding: '6px 10px', borderRadius: 40, border: 'none', cursor: 'pointer',
           background: outputSize === s ? 'rgba(98,90,34,0.10)' : 'transparent',
           color: outputSize === s ? '#292929' : '#72726e',
+          display: 'flex', alignItems: 'center', gap: 5,
         }}>
+          <span style={{
+            width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+            background: outputSize === s ? '#292929' : 'transparent',
+            border: outputSize === s ? 'none' : '1px solid #72726e',
+            display: 'inline-block',
+          }} />
           {s}
         </button>
       ))}
