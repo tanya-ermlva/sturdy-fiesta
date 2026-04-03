@@ -2,7 +2,8 @@
 'use client'
 import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { drawBackground, drawGridLayer } from './draw'
-import type { FrameSnapshot, RendererAdapter } from './types'
+import { buildFilters } from './filters'
+import type { AdjustmentLayer, FrameSnapshot, RendererAdapter } from './types'
 
 function ensureChildAt(stage: Container, child: Container, index: number): void {
   if (child.parent === stage) {
@@ -18,6 +19,8 @@ export class PixiRenderer implements RendererAdapter {
   private layerGraphics = new Map<string, Graphics | Sprite>()
   private layerUrls = new Map<string, string>()
   private size = 512
+  private layersContainer: Container | null = null
+  private displacementSprite: Sprite | null = null
 
   async init(host: HTMLElement, size: number): Promise<void> {
     if (this.app) return
@@ -34,21 +37,51 @@ export class PixiRenderer implements RendererAdapter {
     // destroy() may have been called while we awaited (React Strict Mode double-invoke)
     if (this.app !== app) return
     this.initialized = true
+
+    // Wrap all content layers in a container so filters apply to the composite
+    this.layersContainer = new Container()
+    app.stage.addChild(this.layersContainer)
+
+    // Generate a white-noise sprite for DisplacementFilter
+    const noiseSize = 256
+    const canvas = document.createElement('canvas')
+    canvas.width = noiseSize
+    canvas.height = noiseSize
+    const ctx = canvas.getContext('2d')!
+    const imageData = ctx.createImageData(noiseSize, noiseSize)
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const v = Math.floor(Math.random() * 256)
+      imageData.data[i] = v
+      imageData.data[i + 1] = v
+      imageData.data[i + 2] = v
+      imageData.data[i + 3] = 255
+    }
+    ctx.putImageData(imageData, 0, 0)
+    const noiseTex = Texture.from(canvas)
+    this.displacementSprite = new Sprite(noiseTex)
+    if ('source' in noiseTex && noiseTex.source) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(noiseTex.source as any).addressMode = 'repeat'
+    }
   }
 
   renderFrame(snapshot: FrameSnapshot): void {
-    if (!this.initialized || !this.app) return
-    const { stage } = this.app
+    if (!this.initialized || !this.app || !this.layersContainer) return
+    const container = this.layersContainer
     const size = this.size
 
+    // Partition layers: content vs adjustment
+    const contentLayers = snapshot.layers.filter((l) => l.kind !== 'adjustment')
+    const adjustmentLayer = snapshot.layers.find((l) => l.kind === 'adjustment') as AdjustmentLayer | undefined
+
     // Track which layer ids appear in this snapshot
-    const snapshotIds = new Set(snapshot.layers.map((l) => l.id))
+    const snapshotIds = new Set(contentLayers.map((l) => l.id))
 
     // Remove graphics for layers that no longer exist
     for (const id of [...this.layerGraphics.keys()]) {
       if (!snapshotIds.has(id)) {
         const g = this.layerGraphics.get(id)!
-        stage.removeChild(g)
+        container.removeChild(g)
         g.destroy()
         this.layerGraphics.delete(id)
         this.layerUrls.delete(id)
@@ -56,7 +89,7 @@ export class PixiRenderer implements RendererAdapter {
     }
 
     // Render layers bottom-to-top, then flush to canvas immediately
-    snapshot.layers.forEach((layer, index) => {
+    contentLayers.forEach((layer, index) => {
       if (layer.kind === 'background') {
         let g = this.layerGraphics.get(layer.id) as Graphics | undefined
         if (!g) {
@@ -64,7 +97,7 @@ export class PixiRenderer implements RendererAdapter {
           this.layerGraphics.set(layer.id, g)
         }
         drawBackground(g, layer.color, size)
-        ensureChildAt(stage, g, index)
+        ensureChildAt(container, g, index)
         return
       }
 
@@ -75,7 +108,7 @@ export class PixiRenderer implements RendererAdapter {
           this.layerGraphics.set(layer.id, g)
         }
         drawGridLayer(g, layer, size)
-        ensureChildAt(stage, g, index)
+        ensureChildAt(container, g, index)
         return
       }
 
@@ -94,9 +127,12 @@ export class PixiRenderer implements RendererAdapter {
         sprite.scale.set(layer.scale)
         sprite.x = layer.x
         sprite.y = layer.y
-        ensureChildAt(stage, sprite, Math.min(index, stage.children.length))
+        ensureChildAt(container, sprite, Math.min(index, container.children.length))
       }
     })
+
+    // Apply adjustment layer filters to the composite container
+    container.filters = adjustmentLayer ? buildFilters(adjustmentLayer.filters, this.displacementSprite) : []
 
     // Flush display-object changes to the WebGL canvas immediately.
     // Without this, rendering is deferred to the auto-ticker and the canvas
@@ -128,6 +164,9 @@ export class PixiRenderer implements RendererAdapter {
     }
     this.layerGraphics.clear()
     this.layerUrls.clear()
+    this.displacementSprite?.destroy()
+    this.displacementSprite = null
+    this.layersContainer = null  // app.destroy(true) handles actual cleanup
     const app = this.app
     this.app = null  // null first so init() detects destruction mid-await
     if (app) {
