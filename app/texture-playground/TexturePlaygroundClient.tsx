@@ -2,7 +2,7 @@
 import { useRef, useState } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { nanoid } from 'nanoid'
-import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride, Frame } from './lib/types'
+import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride, Frame, FilterEntry, FilterType } from './lib/types'
 import CanvasPreview from './components/CanvasPreview'
 import LeftPanel from './components/LeftPanel'
 import TopBar from './components/TopBar'
@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 const DEFAULT_LAYERS: Layer[] = [
   { id: 'bg', kind: 'background', color: '#434625' },
   { id: 'g1', kind: 'grid', composition: 'dot-grid', spacing: 18, thickness: 1, dotSize: 3, opacity: 1, scale: 1 },
+  { id: 'adj', kind: 'adjustment', filters: [] },
 ]
 
 const DEFAULT_PROJECT: Project = {
@@ -64,9 +65,12 @@ export default function TexturePlaygroundClient() {
     }
     setProject(p => ({
       ...p,
-      frames: p.frames.map(f =>
-        f.id !== p.activeFrameId ? f : { ...f, layers: [...f.layers, newLayer] }
-      ),
+      frames: p.frames.map(f => {
+        if (f.id !== p.activeFrameId) return f
+        const adjLayers = f.layers.filter(l => l.kind === 'adjustment')
+        const contentLayers = f.layers.filter(l => l.kind !== 'adjustment')
+        return { ...f, layers: [...contentLayers, newLayer, ...adjLayers] }
+      }),
     }))
     setSelectedLayerId(newLayer.id)
   }
@@ -77,7 +81,8 @@ export default function TexturePlaygroundClient() {
       frames: p.frames.map(f => {
         if (f.id !== p.activeFrameId) return f
         const layer = f.layers.find(l => l.id === layerId)
-        if (layer?.kind === 'image') URL.revokeObjectURL(layer.objectUrl)
+        if (!layer || layer.kind === 'adjustment') return f  // guard
+        if (layer.kind === 'image') URL.revokeObjectURL(layer.objectUrl)
         return { ...f, layers: f.layers.filter(l => l.id !== layerId) }
       }),
     }))
@@ -92,11 +97,64 @@ export default function TexturePlaygroundClient() {
     }
     setProject(p => ({
       ...p,
-      frames: p.frames.map(f =>
-        f.id !== p.activeFrameId ? f : { ...f, layers: [...f.layers, newLayer] }
-      ),
+      frames: p.frames.map(f => {
+        if (f.id !== p.activeFrameId) return f
+        const adjLayers = f.layers.filter(l => l.kind === 'adjustment')
+        const contentLayers = f.layers.filter(l => l.kind !== 'adjustment')
+        return { ...f, layers: [...contentLayers, newLayer, ...adjLayers] }
+      }),
     }))
     setSelectedLayerId(newLayer.id)
+  }
+
+  function handleAddFilter(entry: FilterEntry) {
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : {
+          ...f,
+          layers: f.layers.map(l =>
+            l.kind === 'adjustment' ? { ...l, filters: [...l.filters, entry] } : l
+          ),
+        }
+      ),
+    }))
+  }
+
+  function handleFilterChange(filterType: FilterType, changes: Partial<FilterEntry>) {
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : {
+          ...f,
+          layers: f.layers.map(l =>
+            l.kind !== 'adjustment' ? l : {
+              ...l,
+              filters: l.filters.map(fe =>
+                fe.type === filterType ? { ...fe, ...changes } as FilterEntry : fe
+              ),
+            }
+          ),
+        }
+      ),
+    }))
+  }
+
+  function handleRemoveFilter(filterType: FilterType) {
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f =>
+        f.id !== p.activeFrameId ? f : {
+          ...f,
+          layers: f.layers.map(l =>
+            l.kind !== 'adjustment' ? l : {
+              ...l,
+              filters: l.filters.filter(fe => fe.type !== filterType),
+            }
+          ),
+        }
+      ),
+    }))
   }
 
   function handleAddToTimeline() {
@@ -178,6 +236,9 @@ export default function TexturePlaygroundClient() {
           onDeleteLayer={handleDeleteLayer}
           onAddImageLayer={handleAddImageLayer}
           onAddToTimeline={handleAddToTimeline}
+          onAddFilter={handleAddFilter}
+          onFilterChange={handleFilterChange}
+          onRemoveFilter={handleRemoveFilter}
           activeComposition={pickerComposition}
           onChangeComposition={(c) => {
             setActiveComposition(c)
