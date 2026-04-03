@@ -250,6 +250,7 @@ export default function TexturePlaygroundClient() {
           onFpsChange={(fps) => setProject(p => ({ ...p, fps }))}
           onPlay={() => setPlaying(true)}
           onStop={() => setPlaying(false)}
+          onAddFrame={handleAddToTimeline}
         />
       </div>
     </div>

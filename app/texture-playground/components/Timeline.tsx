@@ -13,49 +13,48 @@ type Props = {
   onFpsChange: (fps: number) => void
   onPlay: () => void
   onStop: () => void
+  onAddFrame: () => void
 }
 
 export default function Timeline({
   frames, activeFrameId, fps, playing,
-  onSelectFrame, onDeleteFrame, onDurationChange, onFpsChange, onPlay, onStop,
+  onSelectFrame, onDeleteFrame, onDurationChange, onFpsChange,
+  onPlay, onStop, onAddFrame,
 }: Props) {
   return (
     <div style={{
-      height: 72, background: '#0e0e0e', borderTop: '1px solid #1e1e1e',
-      display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', flexShrink: 0,
+      position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)',
+      background: 'rgba(98,90,34,0.06)', borderRadius: 20,
+      padding: '18px 24px 8px',
+      display: 'flex', alignItems: 'flex-start', gap: 6,
+      whiteSpace: 'nowrap',
     }}>
-      <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 9, color: '#333', letterSpacing: '0.1em', textTransform: 'uppercase', marginRight: 8, flexShrink: 0 }}>
-        Timeline
-      </span>
-
-      {frames.map((frame, i) => (
+      {/* Frame thumbnails */}
+      {frames.map((frame) => (
         <div key={frame.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
           <div
             onClick={() => onSelectFrame(frame.id)}
-            title={`Frame ${i + 1}`}
             style={{
-              width: 44, height: 44, borderRadius: 4, cursor: 'pointer',
-              background: '#434625', border: `1px solid ${activeFrameId === frame.id ? '#D1E043' : '#2a2a2a'}`,
+              width: 54, height: 54, borderRadius: 12, cursor: 'pointer',
+              background: '#f7f7f2',
+              border: `1px solid ${activeFrameId === frame.id ? '#d1e043' : 'rgba(71,67,42,0.2)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-geist-mono)', fontSize: 9, color: '#D1E043',
-              position: 'relative',
+              position: 'relative', flexShrink: 0,
             }}
           >
-            F{i + 1}
+            <div style={{ width: 30, height: 30, borderRadius: 6, background: '#434625' }} />
             {frames.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDeleteFrame(frame.id) }}
                 style={{
                   position: 'absolute', top: -4, right: -4,
                   width: 14, height: 14, borderRadius: '50%',
-                  background: '#1e1e1e', border: '1px solid #333',
-                  color: '#555', fontSize: 9, cursor: 'pointer',
+                  background: '#f7f7f2', border: '1px solid rgba(71,67,42,0.2)',
+                  color: '#72726e', fontSize: 9, cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   padding: 0, lineHeight: 1,
                 }}
-              >
-                ×
-              </button>
+              >×</button>
             )}
           </div>
           <input
@@ -64,8 +63,8 @@ export default function Timeline({
             min={1} max={120}
             onChange={(e) => onDurationChange(frame.id, Math.max(1, Number(e.target.value)))}
             style={{
-              width: 44, background: 'transparent', border: 'none',
-              fontFamily: 'var(--font-geist-mono)', fontSize: 8, color: '#444',
+              width: 54, background: 'transparent', border: 'none',
+              fontFamily: 'var(--font-geist-mono)', fontSize: 9, color: '#72726e',
               textAlign: 'center', padding: 0,
             }}
             title="Duration in frames"
@@ -73,17 +72,27 @@ export default function Timeline({
         </div>
       ))}
 
-      <div style={{ flex: 1 }} />
+      {/* Add frame button */}
+      <button
+        onClick={onAddFrame}
+        style={{
+          width: 36, height: 36, borderRadius: 12, border: 'none', cursor: 'pointer',
+          background: '#f7f7f2', color: '#292929', fontSize: 22,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, alignSelf: 'center',
+        }}
+      >+</button>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* fps + play */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, alignSelf: 'center', marginLeft: 4 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 9, color: '#444' }}>fps</span>
+          <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 9, color: '#72726e' }}>fps</span>
           <input
             type="number" value={fps} min={1} max={60}
             onChange={(e) => onFpsChange(Math.max(1, Math.min(60, Number(e.target.value))))}
             style={{
               width: 30, background: 'transparent', border: 'none',
-              fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: '#888',
+              fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: '#292929',
               textAlign: 'center', padding: 0,
             }}
           />
@@ -91,10 +100,10 @@ export default function Timeline({
         <button
           onClick={playing ? onStop : onPlay}
           style={{
-            width: 30, height: 30, borderRadius: '50%',
-            background: '#D1E043', color: '#111', border: 'none',
+            width: 64, height: 64, borderRadius: '50%',
+            background: '#b2c248', color: '#292929', border: 'none',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, cursor: 'pointer', flexShrink: 0,
+            fontSize: 16, cursor: 'pointer', flexShrink: 0,
           }}
         >
           {playing ? '■' : '▶'}
