@@ -133,6 +133,18 @@ export class PixiRenderer implements RendererAdapter {
           sprite = new Sprite(tex)
           this.layerGraphics.set(layer.id, sprite)
           this.layerUrls.set(layer.id, layer.src)
+          // Texture loads async — re-render once ready so width/height apply correctly.
+          // If texture is already cached this never fires (event already passed), which is fine
+          // because sprite.width below will work immediately with the loaded dimensions.
+          const capturedSprite = sprite
+          const capturedApp = this.app
+          tex.source.once('loaded', () => {
+            if (capturedApp && this.initialized) {
+              capturedSprite.width = size * layer.scale
+              capturedSprite.height = size * layer.scale
+              capturedApp.renderer.render(capturedApp.stage)
+            }
+          })
         }
         // scale: 1.0 = fill the canvas; scale: 1.5 = 150% of canvas size
         sprite.width = size * layer.scale
