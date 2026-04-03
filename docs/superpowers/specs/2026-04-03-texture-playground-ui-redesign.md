@@ -39,7 +39,7 @@ Replicate the Figma design: replace the dark-chrome UI with a warm beige light t
 └─────────────────────────────────────────────────┘
 ```
 
-- No TopBar component — its content moves to the export pill and left panel
+- No fixed TopBar row — the export pill floats top-right over the canvas, Timeline floats bottom-center over the canvas
 - Left panel: `width: 300px`, `padding: 8px`, `display: flex, flex-direction: column, gap: 4px`, no background of its own (page bg shows through), `overflow-y: auto`
 - Canvas area: `flex: 1`, `padding: 8px 8px 8px 0`, canvas element itself has `border-radius: 32px`, white background
 - Export pill: `position: absolute, top: 8px, right: 8px`
@@ -101,7 +101,9 @@ Replaces `ColorPicker.tsx` entirely — the hex input picker is removed.
 
 ---
 
-## Export Pill (top right)
+## TopBar → Export Pill (floating, top right)
+
+`TopBar.tsx` is rewritten — stripped to just the export pill. The "Texture" title label is removed. Size selector moves into the pill.
 
 ```
 ┌────────────────────────────────────────────────────┐
@@ -117,15 +119,19 @@ Replaces `ColorPicker.tsx` entirely — the hex input picker is removed.
 
 ---
 
-## Frame Pill (bottom center)
+## Timeline (floating pill, bottom center)
 
-A small floating container, `border-radius: 20px`, `background: rgba(98,90,34,0.06)`, `padding: 18px 18px 8px 24px`.
+`Timeline.tsx` is restyled — all existing logic (frame selection, duration, fps, play/stop, delete) is kept. Visual changes only:
 
-Contents (horizontal row):
-- Frame thumbnails: each is `54px × 54px`, `border-radius: 12px`, `background: #f7f7f2`, active frame gets `border: 1px solid #d1e043`. Shows the background color of that frame (or just a filled square). Click → select frame. Hover shows × delete button.
-- `+` button: `36px × 36px`, `background: #f7f7f2`, `border-radius: 12px`, icon `+` — adds a new frame
-- Frame duration stepper: `– [N] +` below the active frame thumbnail (or inline). Small text, `#72726e`.
-- Play/stop button: `64px × 64px` circle, `background: #b2c248`, `color: #292929`, shows ▶ / ■
+- Remove the fixed `height: 72px` full-width bar
+- Container becomes `position: absolute, bottom: 18px, left: calc(300px + 50% of remaining width)` — centred over the canvas area, not the full page
+- `border-radius: 20px`, `background: rgba(98,90,34,0.06)`, `padding: 18px 24px 8px`
+- Frame thumbnails: `54px × 54px`, `border-radius: 12px`, `background: #f7f7f2`, active gets `border: 1px solid #d1e043`
+- Frame duration number input: below thumbnail, small, `color: #72726e`
+- "+" add-frame button: same size as thumbnails, `background: #f7f7f2`
+- Play/stop button: `64px` circle, `background: #b2c248`, `color: #292929`, ▶ / ■
+- fps input: small, near play button, `color: #72726e`
+- "Timeline" label removed
 
 ---
 
@@ -133,11 +139,9 @@ Contents (horizontal row):
 
 | File | Change |
 |---|---|
-| `TexturePlaygroundClient.tsx` | New layout shell (no TopBar, absolute-position pill + frame pill) |
-| `components/TopBar.tsx` | **Delete** — replaced by ExportPill |
-| `components/ExportPill.tsx` | **New** — top-right export + size selector |
-| `components/FramePill.tsx` | **New** — replaces Timeline.tsx |
-| `components/Timeline.tsx` | **Delete** — replaced by FramePill |
+| `TexturePlaygroundClient.tsx` | New layout shell — no fixed TopBar row, pills float over canvas |
+| `components/TopBar.tsx` | Rewrite — stripped to export pill only (no title, no size selector row) |
+| `components/Timeline.tsx` | Restyle — floating pill at bottom center, same logic, new look |
 | `components/LeftPanel.tsx` | Rewrite — accordion structure, new tokens |
 | `components/controls/ColorPicker.tsx` | Rewrite — circle swatches, remove hex input |
 | `components/controls/FilterStack.tsx` | Restyle only — light theme tokens |
