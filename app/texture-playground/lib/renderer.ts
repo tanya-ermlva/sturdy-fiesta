@@ -3,7 +3,7 @@
 import { Application, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { drawBackground, drawGridLayer } from './draw'
 import { buildFilters } from './filters'
-import type { AdjustmentLayer, FrameSnapshot, RendererAdapter } from './types'
+import type { AdjustmentLayer, MidgroundLayer, FrameSnapshot, RendererAdapter } from './types'
 
 function ensureChildAt(stage: Container, child: Container, index: number): void {
   if (child.parent === stage) {
@@ -109,6 +109,38 @@ export class PixiRenderer implements RendererAdapter {
         }
         drawGridLayer(g, layer, size)
         ensureChildAt(container, g, index)
+        return
+      }
+
+      if (layer.kind === 'midground') {
+        if (!layer.src) {
+          // Nothing selected — remove any existing sprite for this layer
+          const existing = this.layerGraphics.get(layer.id)
+          if (existing) {
+            container.removeChild(existing)
+            existing.destroy()
+            this.layerGraphics.delete(layer.id)
+            this.layerUrls.delete(layer.id)
+          }
+          return
+        }
+        const existingSprite = this.layerGraphics.get(layer.id) as Sprite | undefined
+        const prevUrl = this.layerUrls.get(layer.id)
+        let sprite = existingSprite
+        if (!sprite || prevUrl !== layer.src) {
+          existingSprite?.destroy()
+          const tex = Texture.from(layer.src)
+          sprite = new Sprite(tex)
+          this.layerGraphics.set(layer.id, sprite)
+          this.layerUrls.set(layer.id, layer.src)
+        }
+        // scale: 1.0 = fill the canvas; scale: 1.5 = 150% of canvas size
+        sprite.width = size * layer.scale
+        sprite.height = size * layer.scale
+        sprite.alpha = layer.opacity
+        sprite.x = layer.x
+        sprite.y = layer.y
+        ensureChildAt(container, sprite, index)
         return
       }
 
