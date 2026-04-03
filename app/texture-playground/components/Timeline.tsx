@@ -1,6 +1,6 @@
 // app/texture-playground/components/Timeline.tsx
 'use client'
-import type { Frame } from '../lib/types'
+import type { Frame, BackgroundLayer, MidgroundLayer } from '../lib/types'
 
 type Props = {
   frames: Frame[]
@@ -36,13 +36,26 @@ export default function Timeline({
             onClick={() => onSelectFrame(frame.id)}
             style={{
               width: 54, height: 54, borderRadius: 12, cursor: 'pointer',
-              background: '#f7f7f2',
               border: `1px solid ${activeFrameId === frame.id ? '#d1e043' : 'rgba(71,67,42,0.2)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', flexShrink: 0,
+              position: 'relative', flexShrink: 0, overflow: 'hidden',
+              background: (frame.layers.find(l => l.kind === 'background') as BackgroundLayer | undefined)?.color ?? '#444625',
             }}
           >
-            <div style={{ width: 30, height: 30, borderRadius: 6, background: '#434625' }} />
+            {(() => {
+              const mid = frame.layers.find(l => l.kind === 'midground') as MidgroundLayer | undefined
+              return mid?.src ? (
+                <img
+                  src={mid.src}
+                  alt=""
+                  style={{
+                    position: 'absolute', inset: 0,
+                    width: '100%', height: '100%',
+                    objectFit: 'cover', opacity: mid.opacity,
+                    mixBlendMode: 'multiply',
+                  }}
+                />
+              ) : null
+            })()}
             {frames.length > 1 && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDeleteFrame(frame.id) }}
