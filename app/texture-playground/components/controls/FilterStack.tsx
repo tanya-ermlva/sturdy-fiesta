@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { AdjustmentLayer, FilterEntry, FilterType } from '../../lib/types'
 import FilterControls from './FilterControls'
+import FilterIcon from './FilterIcon'
 
 type Props = {
   layer: AdjustmentLayer
@@ -23,46 +24,102 @@ const FILTER_DEFAULTS: Record<FilterType, FilterEntry> = {
 }
 
 const FILTER_LABELS: Record<FilterType, string> = {
-  noise: 'Noise', blur: 'Blur', pixelate: 'Pixelate', displacement: 'Displacement',
-  rgbsplit: 'RGB Split', colormatrix: 'Colour Adjust', halftone: 'Halftone', glow: 'Glow',
+  noise: 'Noise', blur: 'Blur', pixelate: 'Pixelate', displacement: 'Displace',
+  rgbsplit: 'RGB', colormatrix: 'Colour', halftone: 'Halftone', glow: 'Glow',
 }
 
+const ALL_FILTERS = Object.keys(FILTER_DEFAULTS) as FilterType[]
+
 export default function FilterStack({ layer, onAdd, onChange, onRemove }: Props) {
-  const [pickerOpen, setPickerOpen] = useState(false)
-  const activeTypes = new Set(layer.filters.map((f) => f.type))
+  const [expanded, setExpanded] = useState<FilterType | null>(null)
+  const activeMap = new Map(layer.filters.map((f) => [f.type, f]))
+
+  function handleTileClick(type: FilterType) {
+    if (activeMap.has(type)) {
+      // Already active — toggle expand/collapse
+      setExpanded(prev => prev === type ? null : type)
+    } else {
+      // Not active — add it and expand
+      onAdd(FILTER_DEFAULTS[type])
+      setExpanded(type)
+    }
+  }
+
+  const expandedEntry = expanded ? activeMap.get(expanded) : null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {layer.filters.map((entry) => (
-        <div
-          key={entry.type}
-          style={{
-            border: '1px solid rgba(71,67,42,0.15)',
-            borderRadius: 8, overflow: 'hidden',
-          }}
-        >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* Tile grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3 }}>
+        {ALL_FILTERS.map((type) => {
+          const active = activeMap.has(type)
+          const open = expanded === type
+          return (
+            <button
+              key={type}
+              onClick={() => handleTileClick(type)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                padding: '8px 4px 6px',
+                background: open
+                  ? 'rgba(178,194,72,0.2)'
+                  : active
+                  ? 'rgba(178,194,72,0.10)'
+                  : 'rgba(98,90,34,0.06)',
+                border: `1px solid ${open
+                  ? 'rgba(178,194,72,0.6)'
+                  : active
+                  ? 'rgba(178,194,72,0.35)'
+                  : 'rgba(71,67,42,0.1)'}`,
+                borderRadius: 8, cursor: 'pointer',
+              }}
+            >
+              <FilterIcon
+                type={type}
+                size={18}
+                color={active ? '#b2c248' : '#72726e'}
+              />
+              <span style={{
+                fontFamily: 'var(--font-geist)', fontSize: 9,
+                color: active ? '#292929' : '#72726e',
+                letterSpacing: '0.02em', lineHeight: 1,
+              }}>
+                {FILTER_LABELS[type]}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Expanded controls */}
+      {expandedEntry && (
+        <div style={{
+          border: '1px solid rgba(71,67,42,0.15)',
+          borderRadius: 8, overflow: 'hidden',
+        }}>
+          {/* Header row */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '8px 12px', background: 'rgba(98,90,34,0.06)',
           }}>
             <button
-              onClick={() => onChange(entry.type, { enabled: !entry.enabled })}
-              title={entry.enabled ? 'Disable' : 'Enable'}
+              onClick={() => onChange(expandedEntry.type, { enabled: !expandedEntry.enabled })}
+              title={expandedEntry.enabled ? 'Disable' : 'Enable'}
               style={{
                 width: 10, height: 10, borderRadius: '50%', padding: 0, border: 'none',
-                background: entry.enabled ? '#b2c248' : 'rgba(71,67,42,0.2)',
+                background: expandedEntry.enabled ? '#b2c248' : 'rgba(71,67,42,0.2)',
                 cursor: 'pointer', flexShrink: 0,
               }}
             />
             <span style={{
               fontFamily: 'var(--font-geist)', fontSize: 13,
-              color: entry.enabled ? '#292929' : '#72726e',
+              color: expandedEntry.enabled ? '#292929' : '#72726e',
               fontWeight: 500, flex: 1,
             }}>
-              {FILTER_LABELS[entry.type]}
+              {FILTER_LABELS[expandedEntry.type]}
             </span>
             <button
-              onClick={() => onRemove(entry.type)}
+              onClick={() => { onRemove(expandedEntry.type); setExpanded(null) }}
               style={{
                 background: 'none', border: 'none', color: '#72726e',
                 cursor: 'pointer', fontSize: 16, padding: 0, lineHeight: 1,
@@ -70,54 +127,16 @@ export default function FilterStack({ layer, onAdd, onChange, onRemove }: Props)
               title="Remove filter"
             >×</button>
           </div>
-          {entry.enabled && (
+
+          {/* Controls */}
+          {expandedEntry.enabled && (
             <div style={{ padding: '8px 12px 4px', background: '#f7f7f2' }}>
-              <FilterControls entry={entry} onChange={(changes) => onChange(entry.type, changes)} />
+              <FilterControls
+                entry={expandedEntry}
+                onChange={(changes) => onChange(expandedEntry.type, changes)}
+              />
             </div>
           )}
-        </div>
-      ))}
-
-      <button
-        onClick={() => setPickerOpen((o) => !o)}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', gap: 6,
-          padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
-          background: 'rgba(98,90,34,0.06)',
-          border: `1px dashed ${pickerOpen ? 'rgba(71,67,42,0.4)' : 'rgba(71,67,42,0.2)'}`,
-          color: '#72726e', fontSize: 13, fontFamily: 'var(--font-geist)',
-        }}
-      >
-        <span style={{ fontSize: 16, lineHeight: 1 }}>{pickerOpen ? '−' : '+'}</span> Add filter
-      </button>
-
-      {pickerOpen && (
-        <div style={{
-          border: '1px solid rgba(71,67,42,0.15)', borderRadius: 8,
-          padding: 4, display: 'flex', flexDirection: 'column', gap: 1,
-          background: '#f7f7f2',
-        }}>
-          {(Object.keys(FILTER_DEFAULTS) as FilterType[]).map((type) => {
-            const active = activeTypes.has(type)
-            return (
-              <button
-                key={type}
-                disabled={active}
-                onClick={() => { onAdd(FILTER_DEFAULTS[type]); setPickerOpen(false) }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '6px 10px', borderRadius: 6, border: 'none',
-                  background: 'none',
-                  color: active ? 'rgba(71,67,42,0.3)' : '#292929',
-                  fontSize: 13, fontFamily: 'var(--font-geist)',
-                  cursor: active ? 'default' : 'pointer', textAlign: 'left',
-                }}
-              >
-                {FILTER_LABELS[type]}
-                {active && <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(71,67,42,0.3)' }}>active</span>}
-              </button>
-            )
-          })}
         </div>
       )}
     </div>
