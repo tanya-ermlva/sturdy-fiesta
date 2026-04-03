@@ -15,12 +15,14 @@ type Props = {
 function layerLabel(layer: Layer): string {
   if (layer.kind === 'background') return 'Background'
   if (layer.kind === 'grid') return layer.composition.replace(/-/g, ' ')
+  if (layer.kind === 'adjustment') return 'Adjustments'
   return 'Image'
 }
 
 function layerIconType(layer: Layer): LayerIconType {
   if (layer.kind === 'background') return 'background'
   if (layer.kind === 'image') return 'image'
+  if (layer.kind === 'adjustment') return 'adjustment'
   return layer.composition
 }
 
@@ -40,13 +42,14 @@ export default function LayerStack({ layers, selectedId, onSelect, onAdd, onDele
               background: selected ? '#161616' : 'transparent',
               color: selected ? '#e8e8e8' : '#666',
               fontSize: 11, fontFamily: 'var(--font-geist)',
+              borderLeft: layer.kind === 'adjustment' ? `2px solid ${selected ? '#D1E043' : '#2a3a10'}` : '2px solid transparent',
             }}
           >
             <CompositionIcon type={layerIconType(layer)} size={14} color={iconColor} />
             <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {layerLabel(layer)}
             </span>
-            {layer.kind !== 'background' && (
+            {layer.kind !== 'background' && layer.kind !== 'adjustment' && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(layer.id) }}
                 style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: 12, padding: 0, lineHeight: 1 }}
