@@ -14,6 +14,7 @@ function ensureChildAt(stage: Container, child: Container, index: number): void 
 
 export class PixiRenderer implements RendererAdapter {
   private app: Application | null = null
+  private initialized = false
   private layerGraphics = new Map<string, Graphics | Sprite>()
   private layerUrls = new Map<string, string>()
   private size = 512
@@ -21,18 +22,22 @@ export class PixiRenderer implements RendererAdapter {
   async init(host: HTMLElement, size: number): Promise<void> {
     if (this.app) return
     this.size = size
-    this.app = new Application()
-    await this.app.init({
+    const app = new Application()
+    this.app = app
+    await app.init({
       canvas: host as HTMLCanvasElement,
       width: size,
       height: size,
       antialias: true,
       backgroundColor: 0xffffff,
     })
+    // destroy() may have been called while we awaited (React Strict Mode double-invoke)
+    if (this.app !== app) return
+    this.initialized = true
   }
 
   renderFrame(snapshot: FrameSnapshot): void {
-    if (!this.app) return
+    if (!this.initialized || !this.app) return
     const { stage } = this.app
     const size = this.size
 
@@ -95,8 +100,8 @@ export class PixiRenderer implements RendererAdapter {
   }
 
   setSize(size: number): void {
-    if (!this.app) return
     this.size = size
+    if (!this.initialized || !this.app) return
     this.app.renderer.resize(size, size)
   }
 
@@ -112,12 +117,16 @@ export class PixiRenderer implements RendererAdapter {
   }
 
   destroy(): void {
-    for (const g of this.layerGraphics.values()) {
-      g.destroy()
+    this.initialized = false
+    for (const g of [...this.layerGraphics.values()]) {
+      try { g.destroy() } catch { /* ignore if not fully initialized */ }
     }
     this.layerGraphics.clear()
     this.layerUrls.clear()
-    this.app?.destroy(true)
-    this.app = null
+    const app = this.app
+    this.app = null  // null first so init() detects destruction mid-await
+    if (app) {
+      try { app.destroy(true) } catch { /* may throw if destroyed before init resolved */ }
+    }
   }
 }
