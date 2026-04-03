@@ -16,22 +16,19 @@ type Props = {
 export default function MidgroundPicker({ layer, onChange, onUpload }: Props) {
   return (
     <div>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, marginBottom: 8,
-      }}>
-        {/* Clear / none button */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4, marginBottom: 8 }}>
+        {/* Clear button */}
         <button
           onClick={() => onChange({ src: null, label: '' })}
           title="No midground"
           style={{
-            aspectRatio: '1', borderRadius: 6, border: `1px solid ${!layer.src ? '#D1E043' : '#1e1e1e'}`,
-            background: '#151515', cursor: 'pointer',
+            aspectRatio: '1', borderRadius: 10, padding: 2,
+            border: `1px solid ${!layer.src ? '#d1e043' : 'rgba(71,67,42,0.2)'}`,
+            background: '#f7f7f2', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: !layer.src ? '#D1E043' : '#333', fontSize: 16,
+            color: !layer.src ? '#b2c248' : 'rgba(71,67,42,0.4)', fontSize: 16,
           }}
-        >
-          ∅
-        </button>
+        >∅</button>
 
         {BUILT_INS.map(({ src, label }) => {
           const selected = layer.src === src
@@ -41,15 +38,15 @@ export default function MidgroundPicker({ layer, onChange, onUpload }: Props) {
               onClick={() => onChange({ src, label })}
               title={`Texture ${label}`}
               style={{
-                aspectRatio: '1', borderRadius: 6, padding: 2,
-                border: `1px solid ${selected ? '#D1E043' : '#1e1e1e'}`,
-                background: '#151515', cursor: 'pointer', overflow: 'hidden',
+                aspectRatio: '1', borderRadius: 10, padding: 2,
+                border: `1px solid ${selected ? '#d1e043' : 'rgba(71,67,42,0.2)'}`,
+                background: '#f7f7f2', cursor: 'pointer', overflow: 'hidden',
               }}
             >
               <img
                 src={src}
                 alt={`Texture ${label}`}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 4, display: 'block' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8, display: 'block' }}
               />
             </button>
           )
@@ -58,9 +55,9 @@ export default function MidgroundPicker({ layer, onChange, onUpload }: Props) {
 
       <label style={{
         display: 'flex', alignItems: 'center', gap: 7,
-        padding: '6px 8px', borderRadius: 5, cursor: 'pointer',
-        background: 'none', border: '1px dashed #222', color: '#333',
-        fontSize: 10, fontFamily: 'var(--font-geist)',
+        padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
+        background: 'rgba(98,90,34,0.06)', border: 'none', color: '#72726e',
+        fontSize: 13, fontFamily: 'var(--font-geist)',
       }}>
         <span style={{ fontSize: 14, lineHeight: 1 }}>↑</span> Upload texture
         <input
