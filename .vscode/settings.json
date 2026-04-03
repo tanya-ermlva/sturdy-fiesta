@@ -1,0 +1,4 @@
+{
+    "tailwindCSS.suggestions": true,
+    "tailwindCSS.experimental.configFile": "./app/globals.css"
+}

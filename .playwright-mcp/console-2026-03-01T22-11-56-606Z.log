@@ -1,0 +1,22 @@
+[     607ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.granola.ai/:0
+[     815ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.granola.ai/_next/static/chunks/710-cdf58a95ba4ec228.js:18
+[     816ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.granola.ai/_next/static/chunks/710-cdf58a95ba4ec228.js:18
+[    1189ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://embeds.iubenda.com/widgets/6be65192-81fb-45ba-87a3-1798cc79c416.js:26
+[    1189ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://embeds.iubenda.com/widgets/6be65192-81fb-45ba-87a3-1798cc79c416.js:26
+[    1282ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    1963ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://www.granola.ai/favicon.ico?v=2:0
+[    2283ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    2285ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    2286ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    2286ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    2287ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    7927ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    7928ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    7995ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://cdn.iubenda.com/cookie_solution/iubenda_cs/1.93.0/core-en.js:0
+[    8042ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.googletagmanager.com/gtm.js?id=GTM-K245QM6Z:160
+[    8043ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.googletagmanager.com/gtm.js?id=GTM-K245QM6Z:160
+[    8045ms] [ERROR] The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy. @ https://www.googletagmanager.com/gtm.js?id=GTM-K245QM6Z:587
+[    8049ms] [ERROR] Framing 'https://www.googletagmanager.com/' violates the following report-only Content Security Policy directive: "frame-src 'self' https://tally.so https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://muse.ai https://platform.twitter.com https://*.iubenda.com". The violation has been logged, but no further action has been taken.
+ @ https://www.googletagmanager.com/:0
+[    8132ms] [ERROR] Framing 'https://www.googletagmanager.com/' violates the following report-only Content Security Policy directive: "frame-src 'self' https://tally.so https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://muse.ai https://platform.twitter.com https://*.iubenda.com". The violation has been logged, but no further action has been taken.
+ @ https://www.googletagmanager.com/:0

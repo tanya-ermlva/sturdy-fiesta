@@ -1,0 +1,50 @@
+[     265ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={<SegmentViewNode>} forbidden={undefined} unauthorized={undefined}>
+          <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<SegmentViewNode>} forbidden={undefined} ...>
+            <RedirectBoundary>
+              <RedirectErrorBoundary router={{...}}>
+                <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} segmentPath={[...]} ...>
+                  <SegmentViewNode type="page" pagePath="page.tsx">
+                    <SegmentTrieNode>
+                    <Home>
+                      <HomeClient>
+                        <main className="relative m...">
+                          <header>
+                          <div className="flex-1 fle...">
+                            <div>
+                            <div ref={{current:null}} className="flex items...">
+                              <ProjectDock onProjectClick={function bound dispatchSetState} availableHeight={0}>
+                                <div
+                                  ref={{current:null}}
+                                  className="flex flex-col items-end"
+                                  style={{
++                                   gap: 8
++                                   overflow: "visible"
+-                                   row-gap: "10px"
+-                                   column-gap: "10px"
+-                                   overflow-x: "visible"
+-                                   overflow-y: "visible"
+                                  }}
+                                  onMouseEnter={function onMouseEnter}
+                                  onMouseMove={function onMouseMove}
+                                  onMouseLeave={function onMouseLeave}
+                                >
+                          ...
+                        ...
+                  ...
+                ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127

@@ -1,0 +1,303 @@
+<h2>Refined layout — A with C's panel structure</h2>
+<p class="subtitle">Canvas always visible centre · Left panel is the full editor · Timeline bottom</p>
+
+<style>
+  .full-mockup {
+    margin-top: 20px;
+    background: #141414;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #333;
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  /* Top bar */
+  .top-bar {
+    background: #1E1E1E;
+    border-bottom: 1px solid #333;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #898985;
+    font-size: 10px;
+  }
+  .top-bar .logo { color: #D1E043; font-weight: bold; letter-spacing: 0.1em; }
+  .top-bar .size-pill {
+    background: #282828; border-radius: 4px;
+    padding: 3px 8px; font-size: 9px; cursor: pointer;
+  }
+  .top-bar .size-pill.active { background: #434625; color: #D1E043; }
+  .top-bar-spacer { flex: 1; }
+  .export-btn {
+    background: #D1E043; color: #1E1E1E;
+    border-radius: 5px; padding: 4px 12px; font-size: 10px; font-weight: bold;
+  }
+
+  /* Main area */
+  .main-area {
+    display: flex;
+    height: 380px;
+  }
+
+  /* Left panel */
+  .left-panel {
+    width: 180px;
+    flex-shrink: 0;
+    background: #1E1E1E;
+    border-right: 1px solid #2a2a2a;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+    overflow: hidden;
+  }
+  .panel-section-label {
+    color: #686865; font-size: 8px; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .composition-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  }
+  .comp-chip {
+    background: #282828; border-radius: 4px;
+    padding: 4px 6px; font-size: 8px; color: #898985;
+    text-align: center; cursor: pointer; border: 1px solid transparent;
+  }
+  .comp-chip.active { background: #434625; color: #D1E043; border-color: #5B6F00; }
+
+  .layer-stack { display: flex; flex-direction: column; gap: 3px; }
+  .layer-row {
+    background: #282828; border-radius: 4px;
+    padding: 5px 7px; display: flex; align-items: center; gap: 6px;
+    font-size: 8px; color: #898985;
+  }
+  .layer-row.active { background: #333; color: #F8F8F3; }
+  .layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .layer-add {
+    border: 1px dashed #333; border-radius: 4px;
+    padding: 4px 7px; font-size: 8px; color: #686865;
+    text-align: center; cursor: pointer;
+  }
+
+  .param-row { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+  .param-label { color: #686865; font-size: 8px; }
+  .param-slider {
+    height: 3px; background: #333; border-radius: 2px;
+    position: relative;
+  }
+  .param-slider-fill { height: 100%; border-radius: 2px; background: #788C15; width: 60%; }
+  .param-slider-thumb {
+    width: 8px; height: 8px; border-radius: 50%; background: #D1E043;
+    position: absolute; top: -2.5px; left: 58%;
+  }
+
+  .add-to-timeline {
+    margin-top: auto;
+    background: #D1E043; color: #1E1E1E;
+    border-radius: 6px; padding: 7px 10px;
+    text-align: center; font-size: 10px; font-weight: bold;
+    cursor: pointer;
+  }
+
+  /* Canvas area */
+  .canvas-area {
+    flex: 1;
+    background: #0d0d0d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .canvas-box {
+    width: 220px; height: 220px;
+    background: #434625;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* dot grid preview */
+  .canvas-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1E1E1E 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+  }
+  .canvas-label {
+    position: absolute;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    color: #686865; font-size: 9px;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px; border-radius: 3px;
+    white-space: nowrap;
+  }
+  .play-indicator {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: #1E1E1E; border-radius: 6px;
+    padding: 4px 8px; font-size: 9px; color: #898985;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .play-dot { width: 6px; height: 6px; border-radius: 50%; background: #686865; }
+
+  /* Timeline */
+  .timeline {
+    background: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tl-label { color: #686865; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; margin-right: 4px; }
+  .tl-frame {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .tl-thumb {
+    width: 44px; height: 44px; border-radius: 5px;
+    background: #434625; position: relative; overflow: hidden;
+    border: 1px solid #5B6F00;
+  }
+  .tl-thumb::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1E1E1E 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+  .tl-thumb-2 { background: #5B6F00; }
+  .tl-thumb-2::before {
+    background-image: radial-gradient(circle, #1E1E1E 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+  }
+  .tl-duration { color: #686865; font-size: 7px; }
+  .tl-duration span { color: #898985; }
+  .tl-add {
+    width: 44px; height: 44px; border-radius: 5px;
+    border: 1px dashed #333;
+    display: flex; align-items: center; justify-content: center;
+    color: #686865; font-size: 18px; cursor: pointer;
+  }
+  .tl-spacer { flex: 1; }
+  .tl-controls { display: flex; align-items: center; gap: 6px; }
+  .tl-fps { color: #686865; font-size: 8px; }
+  .tl-fps span { color: #D1E043; }
+  .play-btn {
+    background: #D1E043; color: #1E1E1E;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+</style>
+
+<div class="full-mockup">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <span class="logo">TEXTURE</span>
+    <span style="color:#333;">|</span>
+    <span class="size-pill">512</span>
+    <span class="size-pill active">1024</span>
+    <span class="size-pill">2048</span>
+    <div class="top-bar-spacer"></div>
+    <span style="font-size:9px;color:#686865;">Export frame ↓</span>
+    <span class="export-btn">Export WebM</span>
+  </div>
+
+  <!-- Main row -->
+  <div class="main-area">
+
+    <!-- Left: editor panel -->
+    <div class="left-panel">
+
+      <!-- Composition picker -->
+      <div>
+        <div class="panel-section-label">Composition</div>
+        <div class="composition-grid">
+          <div class="comp-chip active">Dot grid</div>
+          <div class="comp-chip">Regular grid</div>
+          <div class="comp-chip">Variable grid</div>
+          <div class="comp-chip">Linear</div>
+          <div class="comp-chip">Layered</div>
+          <div class="comp-chip">Checkered</div>
+        </div>
+      </div>
+
+      <!-- Layer stack -->
+      <div>
+        <div class="panel-section-label">Layers</div>
+        <div class="layer-stack">
+          <div class="layer-row active">
+            <div class="layer-dot" style="background:#D1E043"></div>
+            Dot grid
+          </div>
+          <div class="layer-row">
+            <div class="layer-dot" style="background:#434625"></div>
+            BG · #434625
+          </div>
+          <div class="layer-add">+ Add layer</div>
+        </div>
+      </div>
+
+      <!-- Parameters for selected layer -->
+      <div>
+        <div class="panel-section-label">Parameters</div>
+        <div class="param-row">
+          <div class="param-label">Spacing — 18px</div>
+          <div class="param-slider"><div class="param-slider-fill"></div><div class="param-slider-thumb"></div></div>
+        </div>
+        <div class="param-row">
+          <div class="param-label">Dot size — 3px</div>
+          <div class="param-slider"><div class="param-slider-fill" style="width:30%;background:#5B6F00"></div><div class="param-slider-thumb" style="left:28%"></div></div>
+        </div>
+        <div class="param-row">
+          <div class="param-label">Opacity — 100%</div>
+          <div class="param-slider"><div class="param-slider-fill" style="width:90%;background:#686865"></div><div class="param-slider-thumb" style="left:88%"></div></div>
+        </div>
+      </div>
+
+      <!-- Add to timeline CTA -->
+      <div class="add-to-timeline">Add to timeline →</div>
+
+    </div>
+
+    <!-- Centre: canvas -->
+    <div class="canvas-area">
+      <div class="canvas-box"></div>
+      <div class="canvas-label">1024 × 1024 · live preview</div>
+      <div class="play-indicator">
+        <div class="play-dot"></div>
+        editing F1
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline">
+    <span class="tl-label">Timeline</span>
+
+    <div class="tl-frame">
+      <div class="tl-thumb" style="border-color:#D1E043;"></div>
+      <div class="tl-duration"><span>F1</span> · 5fr</div>
+    </div>
+
+    <div class="tl-frame">
+      <div class="tl-thumb tl-thumb-2"></div>
+      <div class="tl-duration"><span>F2</span> · 8fr</div>
+    </div>
+
+    <div class="tl-add">+</div>
+
+    <div class="tl-spacer"></div>
+
+    <div class="tl-controls">
+      <div class="tl-fps">fps <span>30</span></div>
+      <div class="play-btn">▶</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top: 16px;">The canvas always shows your current texture live. "Editing F1" indicator top-right shows which frame you're building. Hit Play to preview the looped animation in the same canvas.</p>

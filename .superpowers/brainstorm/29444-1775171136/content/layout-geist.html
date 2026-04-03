@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texture Playground — Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0a;
+    color: #e8e8e8;
+    font-family: 'Geist', system-ui, sans-serif;
+    font-size: 12px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    gap: 12px;
+  }
+
+  .page-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+
+  /* ─── App Shell ─── */
+  .app {
+    width: 100%;
+    max-width: 900px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* ─── Top bar ─── */
+  .topbar {
+    height: 40px;
+    background: #111;
+    border-bottom: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+  }
+  .topbar-name {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: #D1E043;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .topbar-divider { width: 1px; height: 16px; background: #222; }
+  .size-group { display: flex; gap: 2px; }
+  .size-btn {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: #555;
+    cursor: pointer;
+  }
+  .size-btn.active {
+    background: #1a1f0f;
+    color: #D1E043;
+  }
+  .topbar-spacer { flex: 1; }
+  .export-frame-btn {
+    font-family: 'Geist', sans-serif;
+    font-size: 10px;
+    color: #555;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .export-frame-btn:hover { color: #888; }
+  .export-btn {
+    font-family: 'Geist', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    background: #D1E043;
+    color: #111;
+    border-radius: 5px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+
+  /* ─── Main area ─── */
+  .main {
+    display: flex;
+    height: 420px;
+  }
+
+  /* ─── Left panel ─── */
+  .left {
+    width: 192px;
+    flex-shrink: 0;
+    border-right: 1px solid #1e1e1e;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .section {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .section:last-of-type { border-bottom: none; }
+
+  .section-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    font-weight: 400;
+    color: #444;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* Composition chips */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+  }
+  .comp-chip {
+    font-family: 'Geist', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: #555;
+    background: #161616;
+    border: 1px solid #1e1e1e;
+    border-radius: 4px;
+    padding: 5px 6px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .comp-chip.active {
+    background: #161d07;
+    border-color: #3a4a10;
+    color: #c8d83a;
+  }
+
+  /* Layers */
+  .layer-list { display: flex; flex-direction: column; gap: 2px; }
+  .layer-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #666;
+    font-size: 11px;
+  }
+  .layer-row.active {
+    background: #161616;
+    color: #e8e8e8;
+  }
+  .layer-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .layer-add {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 8px;
+    color: #333;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px dashed #222;
+    margin-top: 2px;
+  }
+
+  /* Parameters */
+  .param { margin-bottom: 10px; }
+  .param:last-child { margin-bottom: 0; }
+  .param-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .param-name {
+    font-family: 'Geist', sans-serif;
+    font-size: 10px;
+    color: #555;
+  }
+  .param-value {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: #888;
+  }
+  .track {
+    height: 2px;
+    background: #1e1e1e;
+    border-radius: 1px;
+    position: relative;
+  }
+  .fill {
+    height: 100%;
+    border-radius: 1px;
+    background: #3a4a10;
+  }
+  .thumb {
+    width: 8px; height: 8px;
+    background: #D1E043;
+    border-radius: 50%;
+    position: absolute;
+    top: -3px;
+    transform: translateX(-50%);
+  }
+
+  /* Add to timeline */
+  .cta-wrap {
+    padding: 12px;
+    margin-top: auto;
+    border-top: 1px solid #1a1a1a;
+  }
+  .cta {
+    font-family: 'Geist', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    background: #D1E043;
+    color: #111;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  /* ─── Canvas ─── */
+  .canvas-area {
+    flex: 1;
+    background: #0c0c0c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .canvas-box {
+    width: 240px;
+    height: 240px;
+    background: #434625;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+  .canvas-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1E1E1E 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+  }
+  .canvas-badge {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    color: #444;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+  .frame-indicator {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    color: #555;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 4px;
+    padding: 3px 7px;
+  }
+  .frame-indicator span { color: #D1E043; }
+
+  /* ─── Timeline ─── */
+  .timeline {
+    height: 72px;
+    background: #0e0e0e;
+    border-top: 1px solid #1e1e1e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+  }
+  .tl-label {
+    font-family: 'Geist Mono', monospace;
+    font-size: 9px;
+    color: #333;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+  .tl-frame { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .tl-thumb {
+    width: 44px; height: 44px;
+    border-radius: 4px;
+    background: #434625;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    cursor: pointer;
+  }
+  .tl-thumb.active { border-color: #D1E043; }
+  .tl-thumb::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #1E1E1E 1px, transparent 1px);
+    background-size: 7px 7px;
+  }
+  .tl-thumb-2 { background: #5B6F00; }
+  .tl-thumb-2::before {
+    background-image: radial-gradient(circle, #1E1E1E 1.5px, transparent 1.5px);
+    background-size: 10px 10px;
+  }
+  .tl-dur {
+    font-family: 'Geist Mono', monospace;
+    font-size: 8px;
+    color: #444;
+  }
+  .tl-add {
+    width: 44px; height: 44px;
+    border-radius: 4px;
+    border: 1px dashed #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .tl-spacer { flex: 1; }
+  .tl-right { display: flex; align-items: center; gap: 10px; }
+  .fps-control {
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    color: #444;
+  }
+  .fps-control span { color: #888; }
+  .play-btn {
+    width: 30px; height: 30px;
+    background: #D1E043;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: #111;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-label">Texture Playground — layout mockup</div>
+
+<div class="app">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-name">Texture</span>
+    <div class="topbar-divider"></div>
+    <div class="size-group">
+      <div class="size-btn">512</div>
+      <div class="size-btn active">1024</div>
+      <div class="size-btn">2048</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <span class="export-frame-btn">Export frame</span>
+    <div class="export-btn">Export WebM</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Left panel -->
+    <div class="left">
+
+      <div class="section">
+        <div class="section-label">Composition</div>
+        <div class="comp-grid">
+          <div class="comp-chip active">Dot grid</div>
+          <div class="comp-chip">Regular</div>
+          <div class="comp-chip">Variable</div>
+          <div class="comp-chip">Linear</div>
+          <div class="comp-chip">Layered</div>
+          <div class="comp-chip">Checkered</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Layers</div>
+        <div class="layer-list">
+          <div class="layer-row active">
+            <div class="layer-swatch" style="background:#D1E043"></div>
+            Dot grid
+          </div>
+          <div class="layer-row">
+            <div class="layer-swatch" style="background:#434625"></div>
+            Background
+          </div>
+        </div>
+        <div class="layer-add">
+          <span style="font-size:14px;line-height:1">+</span> Add layer
+        </div>
+      </div>
+
+      <div class="section" style="flex:1;">
+        <div class="section-label">Parameters</div>
+        <div class="param">
+          <div class="param-header">
+            <span class="param-name">Spacing</span>
+            <span class="param-value">18px</span>
+          </div>
+          <div class="track">
+            <div class="fill" style="width:55%"></div>
+            <div class="thumb" style="left:55%"></div>
+          </div>
+        </div>
+        <div class="param">
+          <div class="param-header">
+            <span class="param-name">Dot size</span>
+            <span class="param-value">3px</span>
+          </div>
+          <div class="track">
+            <div class="fill" style="width:25%"></div>
+            <div class="thumb" style="left:25%"></div>
+          </div>
+        </div>
+        <div class="param">
+          <div class="param-header">
+            <span class="param-name">Opacity</span>
+            <span class="param-value">100%</span>
+          </div>
+          <div class="track">
+            <div class="fill" style="width:92%"></div>
+            <div class="thumb" style="left:92%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-wrap">
+        <div class="cta">Add to timeline →</div>
+      </div>
+
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-area">
+      <div class="canvas-box"></div>
+      <div class="canvas-badge">1024 × 1024 · live preview</div>
+      <div class="frame-indicator">editing <span>F1</span></div>
+    </div>
+
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline">
+    <span class="tl-label">Timeline</span>
+
+    <div class="tl-frame">
+      <div class="tl-thumb active"></div>
+      <div class="tl-dur">5 fr</div>
+    </div>
+    <div class="tl-frame">
+      <div class="tl-thumb tl-thumb-2"></div>
+      <div class="tl-dur">8 fr</div>
+    </div>
+    <div class="tl-add">+</div>
+
+    <div class="tl-spacer"></div>
+
+    <div class="tl-right">
+      <div class="fps-control">fps <span>30</span></div>
+      <div class="play-btn">▶</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-label" style="align-self:flex-start; margin-top:4px;">Canvas always shows live texture · Play previews animation loop · Add to timeline saves current frame</div>
+
+</body>
+</html>

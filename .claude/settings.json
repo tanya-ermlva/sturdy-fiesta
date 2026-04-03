@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /Users/Tatiana/Dropbox/DesignProjects/-2024Coding/Portfolio/scripts/sync-obsidian.py >> /tmp/obsidian-sync.log 2>&1 &",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
