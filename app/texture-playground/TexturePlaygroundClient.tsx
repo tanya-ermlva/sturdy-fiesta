@@ -36,7 +36,6 @@ export default function TexturePlaygroundClient() {
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
   const snapshot = resolveFrame(activeFrame)
 
-  const [selectedLayerId, setSelectedLayerId] = useState('mid')
   const [exporting, setExporting] = useState(false)
   const [playing, setPlaying] = useState(false)
   usePlayback(adapter, project, playing, () => setPlaying(false))
@@ -67,7 +66,6 @@ export default function TexturePlaygroundClient() {
         return { ...f, layers: [...contentLayers, newLayer, ...adjLayers] }
       }),
     }))
-    setSelectedLayerId(newLayer.id)
   }
 
   function handleDeleteLayer(layerId: string) {
@@ -81,7 +79,6 @@ export default function TexturePlaygroundClient() {
         return { ...f, layers: f.layers.filter(l => l.id !== layerId) }
       }),
     }))
-    setSelectedLayerId(prev => prev === layerId ? 'bg' : prev)
   }
 
   function handleAddImageLayer(file: File) {
@@ -99,7 +96,6 @@ export default function TexturePlaygroundClient() {
         return { ...f, layers: [...contentLayers, newLayer, ...adjLayers] }
       }),
     }))
-    setSelectedLayerId(newLayer.id)
   }
 
   function handleAddFilter(entry: FilterEntry) {
@@ -212,13 +208,8 @@ export default function TexturePlaygroundClient() {
     >
       <LeftPanel
         snapshot={snapshot}
-        selectedLayerId={selectedLayerId}
-        onSelectLayer={setSelectedLayerId}
         onLayerChange={handleLayerChange}
         onAddGridLayer={() => handleAddGridLayer('dot-grid')}
-        onDeleteLayer={handleDeleteLayer}
-        onAddImageLayer={handleAddImageLayer}
-        onAddToTimeline={handleAddToTimeline}
         onAddFilter={handleAddFilter}
         onFilterChange={handleFilterChange}
         onRemoveFilter={handleRemoveFilter}
