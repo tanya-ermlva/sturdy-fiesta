@@ -36,6 +36,17 @@ export type ImageLayer = {
   opacity: number
 }
 
+export type MidgroundLayer = {
+  id: string
+  kind: 'midground'
+  src: string | null  // '/textures/midground/1.png' or object URL; null = nothing selected
+  label: string       // '1'–'11' for built-ins, filename for uploads, '' if unset
+  opacity: number
+  scale: number       // 1.0 = fills canvas exactly
+  x: number           // pixel offset from top-left
+  y: number
+}
+
 // ── Filter types ──────────────────────────────────────────────────────────────
 
 export type FilterType =
@@ -58,10 +69,10 @@ export type AdjustmentLayer = {
   filters: FilterEntry[]
 }
 
-export type Layer = BackgroundLayer | GridLayer | ImageLayer | AdjustmentLayer
+export type Layer = BackgroundLayer | GridLayer | ImageLayer | MidgroundLayer | AdjustmentLayer
 
 // Used by LayerControls onChange callbacks — partial properties to apply to a layer
-export type LayerOverride = Partial<Omit<GridLayer | BackgroundLayer | ImageLayer, 'id' | 'kind' | 'file'>>
+export type LayerOverride = Partial<Omit<GridLayer | BackgroundLayer | ImageLayer | MidgroundLayer, 'id' | 'kind' | 'file'>>
 
 export type Frame = {
   id: string
