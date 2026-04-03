@@ -1,7 +1,7 @@
 // app/texture-playground/components/controls/CompositionIcon.tsx
 import type { CompositionType } from '../../lib/types'
 
-export type LayerIconType = CompositionType | 'background' | 'image' | 'adjustment'
+export type LayerIconType = CompositionType | 'background' | 'image' | 'adjustment' | 'midground'
 
 type Props = {
   type: LayerIconType
@@ -94,6 +94,15 @@ export default function CompositionIcon({ type, size = 16, color = 'currentColor
           <rect x={1} y={3} width={14} height={10} rx={1.5} stroke={color} strokeWidth={1} />
           <circle cx={5} cy={6.5} r={1.5} fill={color} opacity={0.8} />
           <path d="M1 10.5 L5.5 7.5 L9 10 L12 8 L15 10.5" {...s} strokeWidth={1} />
+        </svg>
+      )
+
+    case 'midground':
+      return (
+        <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+          <rect x={1} y={3} width={14} height={10} rx={1.5} fill={color} opacity={0.25} />
+          <rect x={1} y={3} width={14} height={10} rx={1.5} stroke={color} strokeWidth={1} />
+          <path d="M3 6 Q6 8 9 6 T15 6" {...s} strokeWidth={0.75} />
         </svg>
       )
 

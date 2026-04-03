@@ -4,6 +4,7 @@ import type { Layer, LayerOverride, AdjustmentLayer, FilterEntry, FilterType } f
 import ColorPicker from './ColorPicker'
 import CompositionPicker from './CompositionPicker'
 import FilterStack from './FilterStack'
+import MidgroundPicker from './MidgroundPicker'
 
 type Props = {
   layer: Layer
@@ -64,6 +65,28 @@ export default function LayerControls({ layer, onChange, onAddFilter, onFilterCh
     return (
       <div>
         <Slider label="Scale" value={layer.scale} min={0.1} max={4} step={0.05} onChange={(v) => onChange({ scale: v })} />
+        <Slider label="Opacity" value={Math.round(layer.opacity * 100)} min={0} max={100} step={1} unit="%" onChange={(v) => onChange({ opacity: v / 100 })} />
+        <Slider label="X offset" value={layer.x} min={-512} max={512} step={1} unit="px" onChange={(v) => onChange({ x: v })} />
+        <Slider label="Y offset" value={layer.y} min={-512} max={512} step={1} unit="px" onChange={(v) => onChange({ y: v })} />
+      </div>
+    )
+  }
+
+  if (layer.kind === 'midground') {
+    return (
+      <div>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontFamily: 'var(--font-geist)', fontSize: 10, color: '#555', marginBottom: 8 }}>Texture</div>
+          <MidgroundPicker
+            layer={layer}
+            onChange={(changes) => onChange(changes)}
+            onUpload={(file) => {
+              const url = URL.createObjectURL(file)
+              onChange({ src: url, label: file.name })
+            }}
+          />
+        </div>
+        <Slider label="Scale" value={layer.scale} min={0.5} max={3} step={0.05} onChange={(v) => onChange({ scale: v })} />
         <Slider label="Opacity" value={Math.round(layer.opacity * 100)} min={0} max={100} step={1} unit="%" onChange={(v) => onChange({ opacity: v / 100 })} />
         <Slider label="X offset" value={layer.x} min={-512} max={512} step={1} unit="px" onChange={(v) => onChange({ x: v })} />
         <Slider label="Y offset" value={layer.y} min={-512} max={512} step={1} unit="px" onChange={(v) => onChange({ y: v })} />

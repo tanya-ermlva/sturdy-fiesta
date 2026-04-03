@@ -27,6 +27,7 @@ function layerLabel(layer: Layer): string {
   if (layer.kind === 'background') return COLOR_NAMES[layer.color] ?? layer.color
   if (layer.kind === 'grid') return layer.composition.replace(/-/g, ' ')
   if (layer.kind === 'adjustment') return 'Adjustments'
+  if (layer.kind === 'midground') return layer.label || 'Midground'
   return 'Image'
 }
 
@@ -34,6 +35,7 @@ function layerIconType(layer: Layer): LayerIconType {
   if (layer.kind === 'background') return 'background'
   if (layer.kind === 'image') return 'image'
   if (layer.kind === 'adjustment') return 'adjustment'
+  if (layer.kind === 'midground') return 'midground'
   return layer.composition
 }
 
