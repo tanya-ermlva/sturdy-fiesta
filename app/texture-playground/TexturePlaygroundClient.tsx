@@ -204,58 +204,54 @@ export default function TexturePlaygroundClient() {
       className={`${geist.variable} ${geistMono.variable}`}
       style={{
         fontFamily: 'var(--font-geist), system-ui, sans-serif',
-        background: '#0a0a0a',
-        color: '#e8e8e8',
+        background: '#f2f2ec',
         height: '100vh',
         display: 'flex',
-        flexDirection: 'column',
         overflow: 'hidden',
       }}
     >
-      <TopBar
-        outputSize={project.outputSize}
-        onSizeChange={(s) => setProject(p => ({ ...p, outputSize: s }))}
-        onExportFrame={handleExportFrame}
-        onExportWebM={handleExportWebM}
-        exporting={exporting}
+      <LeftPanel
+        snapshot={snapshot}
+        selectedLayerId={selectedLayerId}
+        onSelectLayer={setSelectedLayerId}
+        onLayerChange={handleLayerChange}
+        onAddGridLayer={() => handleAddGridLayer('dot-grid')}
+        onDeleteLayer={handleDeleteLayer}
+        onAddImageLayer={handleAddImageLayer}
+        onAddToTimeline={handleAddToTimeline}
+        onAddFilter={handleAddFilter}
+        onFilterChange={handleFilterChange}
+        onRemoveFilter={handleRemoveFilter}
       />
 
-      {/* Main area */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <LeftPanel
-          snapshot={snapshot}
-          selectedLayerId={selectedLayerId}
-          onSelectLayer={setSelectedLayerId}
-          onLayerChange={handleLayerChange}
-          onAddGridLayer={() => handleAddGridLayer('dot-grid')}
-          onDeleteLayer={handleDeleteLayer}
-          onAddImageLayer={handleAddImageLayer}
-          onAddToTimeline={handleAddToTimeline}
-          onAddFilter={handleAddFilter}
-          onFilterChange={handleFilterChange}
-          onRemoveFilter={handleRemoveFilter}
-        />
-
+      {/* Canvas area — TopBar and Timeline float inside this */}
+      <div style={{ flex: 1, position: 'relative' }}>
         <CanvasPreview
           snapshot={snapshot}
           outputSize={project.outputSize}
           onAdapterReady={(a) => { adapterRef.current = a; setAdapter(a) }}
-          frameLabel={`editing ${(project.frames.indexOf(activeFrame) + 1)}/${project.frames.length}`}
+          frameLabel={`${project.frames.indexOf(activeFrame) + 1}/${project.frames.length}`}
+        />
+        <TopBar
+          outputSize={project.outputSize}
+          onSizeChange={(s) => setProject(p => ({ ...p, outputSize: s }))}
+          onExportFrame={handleExportFrame}
+          onExportWebM={handleExportWebM}
+          exporting={exporting}
+        />
+        <Timeline
+          frames={project.frames}
+          activeFrameId={project.activeFrameId}
+          fps={project.fps}
+          playing={playing}
+          onSelectFrame={(id) => setProject(p => ({ ...p, activeFrameId: id }))}
+          onDeleteFrame={handleDeleteFrame}
+          onDurationChange={handleDurationChange}
+          onFpsChange={(fps) => setProject(p => ({ ...p, fps }))}
+          onPlay={() => setPlaying(true)}
+          onStop={() => setPlaying(false)}
         />
       </div>
-
-      <Timeline
-        frames={project.frames}
-        activeFrameId={project.activeFrameId}
-        fps={project.fps}
-        playing={playing}
-        onSelectFrame={(id) => setProject(p => ({ ...p, activeFrameId: id }))}
-        onDeleteFrame={handleDeleteFrame}
-        onDurationChange={handleDurationChange}
-        onFpsChange={(fps) => setProject(p => ({ ...p, fps }))}
-        onPlay={() => setPlaying(true)}
-        onStop={() => setPlaying(false)}
-      />
     </div>
   )
 }
