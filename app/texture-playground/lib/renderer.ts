@@ -1,0 +1,108 @@
+// app/texture-playground/lib/renderer.ts
+'use client'
+import { Application, Graphics, Sprite, Texture } from 'pixi.js'
+import { drawBackground, drawGridLayer } from './draw'
+import type { FrameSnapshot, RendererAdapter } from './types'
+
+export class PixiRenderer implements RendererAdapter {
+  private app: Application | null = null
+  private layerGraphics = new Map<string, Graphics>()
+  private size = 512
+
+  async init(host: HTMLElement, size: number): Promise<void> {
+    this.size = size
+    this.app = new Application()
+    await this.app.init({
+      canvas: host as HTMLCanvasElement,
+      width: size,
+      height: size,
+      antialias: true,
+      backgroundColor: 0xffffff,
+    })
+  }
+
+  renderFrame(snapshot: FrameSnapshot): void {
+    if (!this.app) return
+    const { stage } = this.app
+    const size = this.size
+
+    // Track which layer ids appear in this snapshot
+    const snapshotIds = new Set(snapshot.layers.map((l) => l.id))
+
+    // Remove graphics for layers that no longer exist
+    for (const [id, g] of this.layerGraphics) {
+      if (!snapshotIds.has(id)) {
+        stage.removeChild(g)
+        g.destroy()
+        this.layerGraphics.delete(id)
+      }
+    }
+
+    // Render layers bottom-to-top
+    snapshot.layers.forEach((layer, index) => {
+      if (layer.kind === 'background') {
+        let g = this.layerGraphics.get(layer.id)
+        if (!g) {
+          g = new Graphics()
+          this.layerGraphics.set(layer.id, g)
+        }
+        drawBackground(g, layer.color, size)
+        stage.addChildAt(g, index)
+        return
+      }
+
+      if (layer.kind === 'grid') {
+        let g = this.layerGraphics.get(layer.id)
+        if (!g) {
+          g = new Graphics()
+          this.layerGraphics.set(layer.id, g)
+        }
+        drawGridLayer(g, layer, size)
+        stage.addChildAt(g, Math.min(index, stage.children.length))
+        return
+      }
+
+      if (layer.kind === 'image') {
+        // Image layers: create a Sprite from the objectUrl
+        let sprite = this.layerGraphics.get(layer.id) as unknown as Sprite | undefined
+        if (!sprite) {
+          const tex = Texture.from(layer.objectUrl)
+          sprite = new Sprite(tex)
+          this.layerGraphics.set(layer.id, sprite as unknown as Graphics)
+        }
+        sprite.alpha = layer.opacity
+        sprite.scale.set(layer.scale)
+        sprite.x = layer.x
+        sprite.y = layer.y
+        stage.addChildAt(sprite, Math.min(index, stage.children.length))
+      }
+    })
+  }
+
+  setSize(size: number): void {
+    if (!this.app) return
+    this.size = size
+    this.app.renderer.resize(size, size)
+  }
+
+  async exportPng(): Promise<Blob> {
+    if (!this.app) throw new Error('Renderer not initialised')
+    // In PixiJS v8, extract.canvas() returns ICanvas (toBlob is optional).
+    // Use extract.base64() which is async and reliable across renderers.
+    const base64 = await this.app.renderer.extract.base64({
+      target: this.app.stage,
+      format: 'png',
+    })
+    const res = await fetch(base64)
+    return res.blob()
+  }
+
+  destroy(): void {
+    for (const g of this.layerGraphics.values()) {
+      g.destroy()
+    }
+    this.layerGraphics.clear()
+    this.app?.destroy(true)
+    this.app = null
+  }
+}
