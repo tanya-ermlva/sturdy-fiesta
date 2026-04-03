@@ -20,9 +20,9 @@ export type GridLayer = {
   composition: CompositionType
   spacing: number
   thickness: number
-  dotSize: number       // used by dot-grid; ignored by others
-  opacity: number       // 0–1
-  scale: number         // 0.5–2.0
+  dotSize: number
+  opacity: number
+  scale: number
 }
 
 export type ImageLayer = {
@@ -36,25 +36,51 @@ export type ImageLayer = {
   opacity: number
 }
 
-export type Layer = BackgroundLayer | GridLayer | ImageLayer
+// ── Filter types ──────────────────────────────────────────────────────────────
+
+export type FilterType =
+  | 'noise' | 'blur' | 'pixelate' | 'displacement'
+  | 'rgbsplit' | 'colormatrix' | 'halftone' | 'glow'
+
+export type FilterEntry =
+  | { type: 'noise';        enabled: boolean; intensity: number }
+  | { type: 'blur';         enabled: boolean; strength: number }
+  | { type: 'pixelate';     enabled: boolean; size: number }
+  | { type: 'displacement'; enabled: boolean; scale: number }
+  | { type: 'rgbsplit';     enabled: boolean; amount: number }
+  | { type: 'colormatrix';  enabled: boolean; brightness: number; contrast: number; saturation: number; hue: number; invert: boolean }
+  | { type: 'halftone';     enabled: boolean; scale: number; angle: number }
+  | { type: 'glow';         enabled: boolean; distance: number; strength: number; color: string }
+
+export type AdjustmentLayer = {
+  id: string
+  kind: 'adjustment'
+  filters: FilterEntry[]
+}
+
+export type Layer = BackgroundLayer | GridLayer | ImageLayer | AdjustmentLayer
 
 // Used by LayerControls onChange callbacks — partial properties to apply to a layer
 export type LayerOverride = Partial<Omit<GridLayer | BackgroundLayer | ImageLayer, 'id' | 'kind' | 'file'>>
 
 export type Frame = {
   id: string
-  layers: Layer[]        // each frame owns its full, independent layer stack
+  layers: Layer[]
   durationFrames: number
 }
 
+export type BaseComposition = {
+  layers: Layer[]
+}
+
 export type Project = {
-  frames: Frame[]               // 1–5
+  frames: Frame[]
   outputSize: 512 | 1024 | 2048
   fps: number
   activeFrameId: string
 }
 
-// Resolved form — used by renderer and exporter, never stored
+// Derived for rendering — never stored
 export type FrameSnapshot = {
   layers: Layer[]
   durationFrames: number
