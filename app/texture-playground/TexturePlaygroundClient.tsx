@@ -1,8 +1,12 @@
 'use client'
 import { useRef, useState } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
-import type { Project, RendererAdapter } from './lib/types'
+import { nanoid } from 'nanoid'
+import type { Project, RendererAdapter, Layer, CompositionType, GridLayer, ImageLayer, LayerOverride } from './lib/types'
 import CanvasPreview from './components/CanvasPreview'
+import LeftPanel from './components/LeftPanel'
+import TopBar from './components/TopBar'
+import Timeline from './components/Timeline'
 import { resolveFrame } from './lib/resolve'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
@@ -30,6 +34,74 @@ export default function TexturePlaygroundClient() {
   const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
   const snapshot = resolveFrame(project.base, activeFrame)
 
+  const [selectedLayerId, setSelectedLayerId] = useState('g1')
+  const [activeComposition, setActiveComposition] = useState<CompositionType>('dot-grid')
+  const [exporting, setExporting] = useState(false)
+  const [playing, setPlaying] = useState(false)
+
+  function handleLayerChange(layerId: string, override: LayerOverride) {
+    setProject(p => ({
+      ...p,
+      base: {
+        layers: p.base.layers.map(l => l.id === layerId ? { ...l, ...override } as Layer : l)
+      }
+    }))
+  }
+
+  function handleAddGridLayer(composition: CompositionType) {
+    const newLayer: GridLayer = {
+      id: nanoid(6), kind: 'grid', composition,
+      spacing: 20, thickness: 1, dotSize: 3, opacity: 1, scale: 1,
+    }
+    setProject(p => ({ ...p, base: { layers: [...p.base.layers, newLayer] } }))
+    setSelectedLayerId(newLayer.id)
+  }
+
+  function handleDeleteLayer(layerId: string) {
+    setProject(p => {
+      const layer = p.base.layers.find(l => l.id === layerId)
+      if (layer?.kind === 'image') URL.revokeObjectURL(layer.objectUrl)
+      return { ...p, base: { layers: p.base.layers.filter(l => l.id !== layerId) } }
+    })
+    setSelectedLayerId(prev => prev === layerId ? 'bg' : prev)
+  }
+
+  function handleAddImageLayer(file: File) {
+    const objectUrl = URL.createObjectURL(file)
+    const newLayer: ImageLayer = {
+      id: nanoid(6), kind: 'image', file, objectUrl,
+      scale: 1, x: 0, y: 0, opacity: 1,
+    }
+    setProject(p => ({ ...p, base: { layers: [...p.base.layers, newLayer] } }))
+    setSelectedLayerId(newLayer.id)
+  }
+
+  function handleAddToTimeline() {
+    const newFrame = { id: nanoid(6), layerOverrides: {}, durationFrames: 5 }
+    setProject(p => ({
+      ...p,
+      frames: [...p.frames.slice(0, 4), newFrame],
+      activeFrameId: newFrame.id,
+    }))
+  }
+
+  function handleDeleteFrame(frameId: string) {
+    setProject(p => {
+      const frames = p.frames.filter(f => f.id !== frameId)
+      return { ...p, frames, activeFrameId: frames[0]?.id ?? p.activeFrameId }
+    })
+  }
+
+  function handleDurationChange(frameId: string, durationFrames: number) {
+    setProject(p => ({
+      ...p,
+      frames: p.frames.map(f => f.id === frameId ? { ...f, durationFrames } : f),
+    }))
+  }
+
+  async function handleExportFrame() { /* wired in Task 16 */ }
+  async function handleExportWebM() { /* wired in Task 16 */ }
+
   return (
     <div
       className={`${geist.variable} ${geistMono.variable}`}
@@ -43,15 +115,28 @@ export default function TexturePlaygroundClient() {
         overflow: 'hidden',
       }}
     >
-      {/* TopBar placeholder */}
-      <div style={{ height: 40, background: '#111', borderBottom: '1px solid #1e1e1e', display: 'flex', alignItems: 'center', padding: '0 16px' }}>
-        <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: '#D1E043', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Texture</span>
-      </div>
+      <TopBar
+        outputSize={project.outputSize}
+        onSizeChange={(s) => setProject(p => ({ ...p, outputSize: s }))}
+        onExportFrame={handleExportFrame}
+        onExportWebM={handleExportWebM}
+        exporting={exporting}
+      />
 
       {/* Main area */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* LeftPanel placeholder */}
-        <div style={{ width: 192, background: '#111', borderRight: '1px solid #1e1e1e', flexShrink: 0 }} />
+        <LeftPanel
+          project={project}
+          selectedLayerId={selectedLayerId}
+          onSelectLayer={setSelectedLayerId}
+          onLayerChange={handleLayerChange}
+          onAddGridLayer={handleAddGridLayer}
+          onDeleteLayer={handleDeleteLayer}
+          onAddImageLayer={handleAddImageLayer}
+          onAddToTimeline={handleAddToTimeline}
+          activeComposition={activeComposition}
+          onChangeComposition={setActiveComposition}
+        />
 
         <CanvasPreview
           snapshot={snapshot}
@@ -61,8 +146,18 @@ export default function TexturePlaygroundClient() {
         />
       </div>
 
-      {/* Timeline placeholder */}
-      <div style={{ height: 72, background: '#0e0e0e', borderTop: '1px solid #1e1e1e' }} />
+      <Timeline
+        frames={project.frames}
+        activeFrameId={project.activeFrameId}
+        fps={project.fps}
+        playing={playing}
+        onSelectFrame={(id) => setProject(p => ({ ...p, activeFrameId: id }))}
+        onDeleteFrame={handleDeleteFrame}
+        onDurationChange={handleDurationChange}
+        onFpsChange={(fps) => setProject(p => ({ ...p, fps }))}
+        onPlay={() => setPlaying(true)}
+        onStop={() => setPlaying(false)}
+      />
     </div>
   )
 }
