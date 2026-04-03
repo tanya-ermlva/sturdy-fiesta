@@ -1,7 +1,9 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
-import type { Project } from './lib/types'
+import type { Project, RendererAdapter } from './lib/types'
+import CanvasPreview from './components/CanvasPreview'
+import { resolveFrame } from './lib/resolve'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
@@ -23,6 +25,10 @@ const DEFAULT_PROJECT: Project = {
 
 export default function TexturePlaygroundClient() {
   const [project, setProject] = useState<Project>(DEFAULT_PROJECT)
+  const adapterRef = useRef<RendererAdapter | null>(null)
+  const [adapter, setAdapter] = useState<RendererAdapter | null>(null)
+  const activeFrame = project.frames.find(f => f.id === project.activeFrameId) ?? project.frames[0]
+  const snapshot = resolveFrame(project.base, activeFrame)
 
   return (
     <div
@@ -47,10 +53,12 @@ export default function TexturePlaygroundClient() {
         {/* LeftPanel placeholder */}
         <div style={{ width: 192, background: '#111', borderRight: '1px solid #1e1e1e', flexShrink: 0 }} />
 
-        {/* CanvasPreview placeholder */}
-        <div style={{ flex: 1, background: '#0c0c0c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-geist-mono)', fontSize: 10, color: '#444' }}>canvas</span>
-        </div>
+        <CanvasPreview
+          snapshot={snapshot}
+          outputSize={project.outputSize}
+          onAdapterReady={(a) => { adapterRef.current = a; setAdapter(a) }}
+          frameLabel={`editing ${(project.frames.indexOf(activeFrame) + 1)}/${project.frames.length}`}
+        />
       </div>
 
       {/* Timeline placeholder */}
