@@ -15,7 +15,7 @@ const geist = Geist({ subsets: ['latin'], variable: '--font-geist' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 const DEFAULT_LAYERS: Layer[] = [
-  { id: 'bg',  kind: 'background',  color: '#434625' },
+  { id: 'bg',  kind: 'background',  color: '#444625' },
   { id: 'mid', kind: 'midground',   src: null, label: '', opacity: 1, scale: 1, x: 0, y: 0 },
   { id: 'adj', kind: 'adjustment',  filters: [] },
 ]
