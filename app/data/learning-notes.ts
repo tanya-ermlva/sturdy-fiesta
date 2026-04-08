@@ -1149,6 +1149,259 @@ Stage 3   <Card title="A" />    defined once, reused 3×
     ],
   },
   {
+    category: "PixiJS",
+    subcategories: [
+      {
+        name: "Texture Loading",
+        notes: [
+          {
+            title: "Texture.from() vs Assets.load()",
+            explanation:
+              "PixiJS v8 has two ways to get a texture. Texture.from(url) is synchronous — it returns immediately, but the texture may not be loaded yet. If you set sprite.width on an unloaded texture, the sprite's internal width is 0, so the scale calculation becomes Infinity or NaN and the sprite is invisible. Assets.load(url) is the correct v8 API: it returns a Promise that resolves when the texture is fully loaded, with real pixel dimensions. It also caches by URL so calling it twice for the same file returns the cached result instantly.",
+          },
+          {
+            title: "Stale async load pattern",
+            explanation:
+              "When you kick off Assets.load() for a texture, the user might select a different texture before the first one finishes. To guard against this, record the URL in a map immediately when the load starts. In the .then() callback, check if the URL in the map still matches the one you captured at dispatch time — if not, discard the result. Also capture all the values you need (scale, opacity, x, y) as local variables before the async call, because by the time .then() runs, the React state those came from may have updated.",
+          },
+          {
+            title: "Silent 404s in PixiJS",
+            explanation:
+              "If Assets.load() fails (e.g. the file doesn't exist, 404), it rejects the Promise. Without a .catch(), the failure is swallowed silently — the sprite never appears and there's no error in the console. Always add .catch() to log the failing URL and clean up any loading state so the next render attempt can retry rather than being stuck in a 'loading' limbo.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    category: "JavaScript Fundamentals",
+    subcategories: [
+      {
+        name: "Array Methods",
+        notes: [
+          {
+            title: ".map() — transform every item in a list",
+            explanation:
+              "map() goes through each item in an array, runs a function on it, and returns a NEW array of the same length. It never changes the original. In React, map() is how you turn a data array into a list of components — same concept, different output type. Think of it like a Figma component with overrides: you have one 'tile' component, and map() creates one instance per project, passing in different data each time.",
+            illustration: {
+              type: "code",
+              label: "JS → React progression",
+              content: `// Plain JS: transform strings
+const names = ["Granola", "Fin.ai"]
+const labels = names.map(name => "🟪 " + name)
+// → ["🟪 Granola", "🟪 Fin.ai"]
+
+// React: transform data into components
+const tiles = projects.map(project => (
+  <Tile key={project.slug} name={project.name} />
+))
+// → [<Tile name="Granola" />, <Tile name="Fin.ai" />]
+
+// Gallery: 8 projects × 4 images = 32 tiles
+const allTiles = projects.flatMap(project =>
+  project.images.map(img => (
+    <GalleryTile key={img.id} projectId={project.slug} src={img.src} />
+  ))
+)`,
+            },
+          },
+        ],
+      },
+      {
+        name: "Operators & Syntax",
+        notes: [
+          {
+            title: "=== strict equality (always use this, not ==)",
+            explanation:
+              "JavaScript has two equality operators. == (loose) tries to convert types before comparing, which produces wild results: 0 == false is true, '' == false is true. === (strict) requires the same type AND the same value — no conversions. Rule: always use ===. Forget == exists. You'll see === constantly in React for comparing state values, checking if a tile belongs to the hovered project, etc.",
+            illustration: {
+              type: "code",
+              label: "== vs ===",
+              content: `// == (loose) — dangerous, avoid
+0 == false   // → true  ← surprising!
+"" == false  // → true  ← surprising!
+"5" == 5     // → true  ← type coercion
+
+// === (strict) — predictable, always use
+0 === false  // → false ✓
+"5" === 5    // → false ✓ (different types)
+5 === 5      // → true ✓
+
+// In React: checking which project is active
+tile.projectId === hoveredProjectId  // ← strict, safe`,
+            },
+          },
+          {
+            title: "Ternary — if/else in one expression",
+            explanation:
+              "A ternary is a one-line if/else. Three parts: condition ? value-if-true : value-if-false. Read ? as 'then' and : as 'otherwise'. You use this constantly in React because JSX doesn't allow if statements inside curly braces — only expressions. Ternaries let you make decisions inline without breaking out of JSX.",
+            illustration: {
+              type: "code",
+              label: "if/else → ternary",
+              content: `// Regular if/else
+if (isHovered) {
+  return "bright"
+} else {
+  return "dim"
+}
+
+// Ternary — same logic, one line
+const opacity = isHovered ? 1 : 0.3
+//              condition  ^ then  ^ otherwise
+
+// In JSX — can't use if here, ternary works great
+<div className={isHovered ? "tile--bright" : "tile--dim"}>
+
+// Nested (use sparingly — hard to read)
+const label = isOpen ? "Close" : isHovered ? "View" : ""`,
+            },
+          },
+          {
+            title: "?. optional chaining — the 'don't crash' operator",
+            explanation:
+              "If you try to access a property on null or undefined, JavaScript crashes with 'Cannot read properties of null'. Optional chaining (?.) says: try to access this, but if the thing doesn't exist, just return undefined instead of crashing. You'll see this everywhere in React because data often starts as null before it loads, or a prop might be optional.",
+            illustration: {
+              type: "code",
+              label: "Crash vs safe",
+              content: `const tile = null
+
+tile.projectId    // 💥 TypeError: Cannot read properties of null
+tile?.projectId   // → undefined (safe, no crash)
+
+// Chaining through multiple levels
+user?.profile?.avatar?.url   // safe at every step
+
+// Common in React with optional props
+<div style={{ opacity: tile?.isActive ? 1 : 0.3 }}>
+
+// With arrays
+tiles?.[0]?.projectId  // safe even if tiles is undefined`,
+            },
+          },
+        ],
+      },
+      {
+        name: "Functions",
+        notes: [
+          {
+            title: "Arrow functions — just shorter syntax for a function",
+            explanation:
+              "An arrow function is the same as a regular function, just written differently. Both take inputs, do something, and return a result. Arrow functions are preferred in React because they're shorter — especially useful inside .map() and event handlers where you're writing many small throwaway functions. The shorthand version drops the curly braces and return keyword when the function just returns one thing.",
+            illustration: {
+              type: "code",
+              label: "Three ways to write the same function",
+              content: `// Named function (old style)
+function double(n) { return n * 2 }
+
+// Arrow function (same thing)
+const double = (n) => { return n * 2 }
+
+// Arrow shorthand — drop {} and return when returning one thing
+const double = (n) => n * 2
+
+// All three: double(5) → 10`,
+            },
+          },
+          {
+            title: "Anonymous functions — functions with no name",
+            explanation:
+              "Most functions in React are anonymous — they have no name because they're used once, inline, and never called from anywhere else. You only name a function when you need to reuse it in multiple places. Anonymous functions appear constantly inside event handlers and .map() calls.",
+            illustration: {
+              type: "code",
+              label: "Named vs anonymous",
+              content: `// Named — reusable
+const handleLeave = () => setHoveredId(null)
+<div onMouseLeave={handleLeave}>   // reused
+<div onMouseLeave={handleLeave}>   // reused again
+
+// Anonymous — one-time, inline
+<div onMouseLeave={() => setHoveredId(null)}>`,
+            },
+          },
+          {
+            title: "The function wrapper — why () => is needed in event handlers",
+            explanation:
+              "In JavaScript, the right side of an assignment is always evaluated immediately — before the left side label matters. So onMouseEnter={setHoveredId('granola')} runs setHoveredId right now, on page load, not on hover. The () => wrapper creates a function to call LATER. Without it, you're passing the result of the function (undefined). With it, you're passing the function itself — React calls it when the event fires.",
+            illustration: {
+              type: "code",
+              label: "Immediate vs deferred",
+              content: `// ❌ Runs immediately on page load
+onMouseEnter={setHoveredId("granola")}
+// JavaScript evaluates right side first:
+// setHoveredId("granola") → runs NOW → returns undefined
+// onMouseEnter = undefined → nothing happens on hover
+
+// ✓ Runs when mouse enters
+onMouseEnter={() => setHoveredId("granola")}
+// Right side creates a function, doesn't call it
+// onMouseEnter = [function, waiting]
+// React calls it later when mouse enters
+
+// Pizza analogy:
+orderPizza()           // calls NOW
+() => orderPizza()     // hands you a button — calls when pressed`,
+            },
+          },
+          {
+            title: "Reading vs evaluation — why the label doesn't protect you",
+            explanation:
+              "Reading means going through code in order, left to right. Evaluation means actually running a piece of code to get its value. When JavaScript hits an = sign, it evaluates the right side first to get a value, then assigns it to the left. The left side label (like onMouseEnter) doesn't delay evaluation of the right side — it just says where the result goes. Think of a recipe: you read 'put the cake in the box' left to right, but you have to make the cake before you can put it anywhere.",
+            illustration: {
+              type: "code",
+              label: "What JavaScript actually does",
+              content: `onMouseEnter = setHoveredId("granola")
+
+// What JS does, step by step:
+// 1. See the = sign
+// 2. Evaluate RIGHT side first: setHoveredId("granola") → RUNS NOW
+// 3. Get the result: undefined
+// 4. Assign to LEFT side: onMouseEnter = undefined
+
+// The label onMouseEnter doesn't matter until step 4.
+// By then, setHoveredId has already fired.`,
+            },
+          },
+        ],
+      },
+      {
+        name: "React Core",
+        notes: [
+          {
+            title: "Component, Props, State — the three core ideas",
+            explanation:
+              "Everything in React is built from three concepts. A Component is a function that returns JSX — it's like a Figma component, a reusable piece of UI. Props are its inputs — read-only data passed in from the parent, like Figma instance overrides. State is internal memory that belongs to the component — when state changes, React redraws that component automatically. The key insight: you never manually update the DOM. You update state, and React figures out what changed.",
+            illustration: {
+              type: "code",
+              label: "All three in one component",
+              content: `// Component = a function that returns JSX
+function GalleryTile(props) {       // ← props are the inputs
+
+  // State = internal memory
+  const [isHovered, setIsHovered] = useState(false)
+  //     ^ current value  ^ function to update it
+
+  // When state changes, this whole function re-runs
+  // and React updates only what changed on screen
+  return (
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ opacity: isHovered ? 1 : 0.4 }}
+    >
+      <img src={props.src} />
+    </div>
+  )
+}
+
+// Parent passes props (like Figma overrides)
+<GalleryTile src="/imgs/granola-1.jpg" projectId="granola" />`,
+            },
+          },
+        ],
+      },
+    ],
+  },
+  {
     category: "Git",
     subcategories: [
       {
