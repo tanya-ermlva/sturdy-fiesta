@@ -1,228 +1,31 @@
 @import "tailwindcss";
 
-@plugin "tailwindcss-animate";
-
-@custom-variant dark (&:is(.dark *));
-
-/* =============================================
-   PRIMITIVES - Raw color values
-   These create utility classes like bg-black-900, text-violet-500
-   ============================================= */
-@theme {
-  /* ===== Black scale ===== */
-  --color-black-100: #D9D9D9;
-  --color-black-200: #C4C4C4;
-  --color-black-300: #ADADAD;
-  --color-black-400: #949494;
-  --color-black-500: #7A7A7A;
-  --color-black-600: #616161;
-  --color-black-700: #484848;
-  --color-black-800: #303030;
-  --color-black-850: #222222;
-  --color-black-900: #171717;
-
-  /* ===== Violet scale ===== */
-  --color-violet-100: #FAE3FF;
-  --color-violet-200: #F5C7FF;
-  --color-violet-300: #E1A6EE;
-  --color-violet-400: #D285E1;
-  --color-violet-500: #EB62ED;
-  --color-violet-600: #B443C7;
-  --color-violet-700: #A522BA;
-  --color-violet-800: #9601AD;
-  --color-violet-900: #8700A0;
-
-  /* ===== White scale ===== */
-  --color-white-100: #F5F3F0;
-  --color-white-200: #EBE4DF;
-  --color-white-300: #D3C8C1;
-  --color-white-400: #BAAFA8;
-  --color-white-500: #A1968F;
-  --color-white-600: #898078;
-  --color-white-700: #706A63;
-  --color-white-800: #57524E;
-  --color-white-900: #3E3A39;
+* {
+  margin: 0;
+  box-sizing: border-box;
 }
 
-/* =============================================
-   SEMANTIC TOKENS - Light mode (default)
-   These are regular CSS variables that change with .dark
-   ============================================= */
+/* ── Color tokens ──────────────────────────────────── */
 :root {
-  /* ===== Base semantic tokens ===== */
-  --background: var(--color-white-100);
-  --foreground: var(--color-black-900);
-  --surface: var(--color-white-200);
-  --accent: var(--color-violet-500);
-  --accent-hover: var(--color-violet-600);
-  --border: var(--color-black-200);
-
-  /* ===== Foreground variants ===== */
-  --foreground-strong: var(--color-black-900);    /* Headings, emphasis */
-  --foreground-default: var(--color-black-800);   /* Body text */
-  --foreground-muted: var(--color-black-600);     /* Secondary text */
-  --foreground-subtle: var(--color-black-400);    /* Tertiary, placeholders */
-
-  /* ===== Surface variants ===== */
-  --surface-strong: var(--color-white-300);       /* Cards, elevated areas */
-  --surface-default: var(--color-white-200);      /* Standard surfaces */
-  --surface-muted: var(--color-white-100);        /* Subtle backgrounds */
-  --surface-subtle: color-mix(in srgb, var(--color-white-100) 50%, transparent);
-
-  /* ===== Border variants ===== */
-  --border-strong: var(--color-black-400);        /* Emphasized borders */
-  --border-default: var(--color-black-300);       /* Standard borders */
-  --border-muted: var(--color-black-200);         /* Subtle dividers */
-  --border-subtle: var(--color-black-100);        /* Barely visible */
-
-  /* ===== Accent variants ===== */
-  --accent-strong: var(--color-violet-700);       /* Dark accent */
-  --accent-default: var(--color-violet-500);      /* Primary accent */
-  --accent-muted: var(--color-violet-300);        /* Soft accent */
-  --accent-subtle: var(--color-violet-100);       /* Tinted backgrounds */
-
-  /* ===== Shadows ===== */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.06);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
-  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.04);
-
-  /* ===== Font ===== */
-  --font-plain: 'Plain Medium', system-ui, sans-serif;
-  --radius: 0.625rem;
+  --background-color: #ffffff;
+  --text-color: #003344;
+  --grid-line: #00000011;
 }
 
-/* =============================================
-   SEMANTIC TOKENS - Dark mode
-   When .dark class is on <html>, these override the :root values
-   ============================================= */
-.dark {
-  /* ===== Base semantic tokens ===== */
-  --background: var(--color-black-900);
-  --foreground: var(--color-white-200);
-  --surface: var(--color-black-850);
-  --accent: var(--color-violet-500);
-  --accent-hover: var(--color-violet-400);
-  --border: var(--color-black-700);
-
-  /* ===== Foreground variants ===== */
-  --foreground-strong: var(--color-white-100);
-  --foreground-default: var(--color-white-200);
-  --foreground-muted: var(--color-black-400);
-  --foreground-subtle: var(--color-black-500);
-
-  /* ===== Surface variants ===== */
-  --surface-strong: var(--color-black-700);
-  --surface-default: var(--color-black-850);
-  --surface-muted: var(--color-black-900);
-  --surface-subtle: color-mix(in srgb, var(--color-black-900) 50%, transparent);
-
-  /* ===== Border variants ===== */
-  --border-strong: var(--color-black-500);
-  --border-default: var(--color-black-700);
-  --border-muted: var(--color-black-800);
-  --border-subtle: var(--color-black-850);
-
-  /* ===== Accent variants ===== */
-  --accent-strong: var(--color-violet-400);
-  --accent-default: var(--color-violet-500);
-  --accent-muted: var(--color-violet-700);
-  --accent-subtle: var(--color-violet-900);
-
-  /* ===== Shadows (darker for dark mode) ===== */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.2);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.25);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.35);
-  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.3);
+body.yellow {
+  --text-color: #f8d11c;
 }
 
-/* =============================================
-   SEMANTIC UTILITIES
-   This creates bg-background, text-foreground, etc.
-   The "inline" keyword makes them use the CSS variable values
-   so they respond to .dark mode changes
-   ============================================= */
-@theme inline {
-  /* Base semantic colors */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-border: var(--border);
-
-  /* Foreground variants */
-  --color-foreground-strong: var(--foreground-strong);
-  --color-foreground-default: var(--foreground-default);
-  --color-foreground-muted: var(--foreground-muted);
-  --color-foreground-subtle: var(--foreground-subtle);
-
-  /* Surface variants */
-  --color-surface-strong: var(--surface-strong);
-  --color-surface-default: var(--surface-default);
-  --color-surface-muted: var(--surface-muted);
-  --color-surface-subtle: var(--surface-subtle);
-
-  /* Border variants */
-  --color-border-strong: var(--border-strong);
-  --color-border-default: var(--border-default);
-  --color-border-muted: var(--border-muted);
-  --color-border-subtle: var(--border-subtle);
-
-  /* Accent variants */
-  --color-accent-strong: var(--accent-strong);
-  --color-accent-default: var(--accent-default);
-  --color-accent-muted: var(--accent-muted);
-  --color-accent-subtle: var(--accent-subtle);
-
-  /* Shadows */
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-inner: var(--shadow-inner);
-
-  /* Radius */
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+body.green {
+  --background-color: #edfff6;
+  --text-color: #00f9b5;
 }
 
-/* =============================================
-   SPOTLIGHT ANIMATION
-   ============================================= */
-@theme {
-  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
-
-  @keyframes spotlight {
-    0% {
-      opacity: 0;
-      transform: translate(-72%, -62%) scale(0.5);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(-50%, -40%) scale(1);
-    }
-  }
+body.blue {
+  --text-color: #2248cd;
 }
 
-@font-face {
-  font-family: 'Pinyon Script';
-  src: url('/fonts/PinyonScript-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* ── Fonts ─────────────────────────────────────────── */
 @font-face {
   font-family: 'Plain Medium';
   src: url('/fonts/PlainMedium.otf') format('opentype');
@@ -239,133 +42,13 @@
   font-display: swap;
 }
 
+/* ── Base ──────────────────────────────────────────── */
 body {
-  font-family: var(--font-plain);
+  font-family: 'Plain Medium', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.05;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 1s, color 1s;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-@layer base {
-  h1, h2, h3, h4, h5, h6 {
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  p, li, span {
-    line-height: 1.4;
-    letter-spacing: 0.005em;
-  }
-}
-
-@layer utilities {
-  /* ===== Text wrapping ===== */
-  .text-balance {
-    text-wrap: balance;
-  }
-  .text-pretty {
-    text-wrap: pretty;
-  }
-
-  /* ===== Letter spacing ===== */
-  .text-tight {
-    letter-spacing: -0.02em;
-  }
-  .text-loose {
-    letter-spacing: 0.02em;
-  }
-
-  /* ===== Borders ===== */
-  .border-hairline {
-    border-width: 0.5px;
-    border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
-  }
-
-  /* ===== Dividers ===== */
-  .divider-x {
-    border-left: 1px solid var(--border-muted);
-  }
-  .divider-y {
-    border-top: 1px solid var(--border-muted);
-  }
-
-  /* ===== Selection ===== */
-  .selection-accent::selection {
-    background: var(--accent-subtle);
-    color: var(--accent-strong);
-  }
-
-  /* ===== Focus ring ===== */
-  .focus-ring {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  .focus-ring-inset {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-  }
-
-  /* ===== Glass/blur effect ===== */
-  .glass {
-    background: var(--surface-subtle);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  /* ===== Gradient masks ===== */
-  .fade-bottom {
-    mask-image: linear-gradient(to bottom, black 60%, transparent);
-  }
-  .fade-top {
-    mask-image: linear-gradient(to top, black 60%, transparent);
-  }
-
-  /* ===== Hide scrollbar ===== */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-/* =============================================
-   PLAYGROUND - Range slider styling
-   ============================================= */
-.playground-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--border-muted);
-  outline: none;
-}
-.playground-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent-default);
-  cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
-}
-.playground-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent-default);
-  cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
 }

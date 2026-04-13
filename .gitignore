@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Superpowers brainstorm sessions
 .superpowers/
+
+# Planning docs (kept locally, not in repo)
+/plans-docs/
+
+# Vanilla prototype reference
+/prototype/
