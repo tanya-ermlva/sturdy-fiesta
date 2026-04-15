@@ -3,7 +3,10 @@ import { MediaItem } from "@/lib/mediaItems";
 
 export default function GridItem({ item }: { item: MediaItem }) {
   return (
-    <Link href={`/projects/${item.project}`} className="flex items-end gap-1 no-underline min-w-0">
+    <Link
+      href={`/projects/${item.project}`}
+      className="flex items-end gap-1 no-underline min-w-0"
+    >
       {item.type === "video" ? (
         <video
           src={item.src}
@@ -11,14 +14,10 @@ export default function GridItem({ item }: { item: MediaItem }) {
           muted
           loop
           playsInline
-          className="flex-1 min-w-0 max-h-[280px] object-contain object-bottom-left"
+          className="flex-1 min-w-0 block"
         />
       ) : (
-        <img
-          src={item.src}
-          alt={item.alt}
-          className="flex-1 min-w-0 max-h-[280px] object-contain object-bottom-left"
-        />
+        <img src={item.src} alt={item.alt} className="flex-1 min-w-0 block" />
       )}
       <span className="shrink-0 text-xs font-mono leading-none">{item.id}</span>
     </Link>
